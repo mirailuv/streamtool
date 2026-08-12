@@ -1,0 +1,15 @@
+.gradle
+.vscode
+.git
+app/build
+app/bin
+app/libs
+build
+lb_data
+out_heads
+output
+snapshots
+runtime_data.json
+seed_order.json
+spectate_match.json
+websocket_log.txt

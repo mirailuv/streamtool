@@ -1,0 +1,82 @@
+build the program with
+$ gradle build
+
+then you can run it with
+$ java -jar app/build/libs/app.jar
+
+make sure obs websocket is enabled with port 4455 and authentication disabled.
+create a symbolic link to spectate_match.json in the folder where you run the program. it must be named spectate_match.json as well.
+$ ln -s path/to/spectate_match.json spectate_match.json
+
+optionally, create a virtual audio device with pipewire and use qpwgraph to connect your discord audio to it, in order to isolate discord audio from other system audio.
+
+start obs. if you want fullscreen preview projector on wayland run it in xcb mode. the side effect is that obs will sometimes just freeze when you're interacting with it. that's fine as long as you don't need to change any settings. scene switching is handled by this program. all you should have to do in obs is press go live.
+run this program with java. there's a bit of delay at the start to make sure websocket is connected.
+on discord, in the league-specific channel, type /list and download the file.
+
+if the program crashes, you can use this command to restore the player and seed data.
+> restore
+
+import the player file.
+> import
+this will open a file selector window, navigate to downloads and select the file. it updates the league information in obs.
+
+use getOrder command to get the seed order from an api, or alternatively copy the example file and input the order manually.
+> getOrder
+this downloads the seed order into a file named seed_order.json in the same folder you're running the program in.
+
+then import the seed order.
+> importSeeds
+this opens a file selector again, navigate and select the seed order file, either one from the api or one you made yourself. it updates the seed order and time limit in obs and sets current seed to 1.
+
+set yourself as the host, in order to get the match data for leaderboard. clear any previous match data.
+> host <username>
+> clear
+
+switch to the intermission scene. set the timer.
+> scene im
+> timer im <seconds>
+
+go live!
+
+switching from intermission at the start:
+> scene co		// switch to commentator scene, do like an intro
+> scene sl		// show the seed order
+> scene ns		// show the first seed on a separate scene
+> main r		// switch to main screen once you've loaded into the minecraft world. shows 4 random people.
+> timer game		// start the timer for the seed-
+
+useful commands during the seed:
+> split			// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
+> main s		// show the top 4 people by splits. only do this once 4 of the people who are live have entered nether. you should be doing this periodically to update the current top 4.
+> main h		// you can use this when the 1st person with a livestream enters nether but only on seed 2 or later. if you do this on seed 1 it will crash because there's no leaderboard data yet.
+> main p		// show the top 4 live players by points. this could be useful combined with selective player hiding to show a close race for promotions for example.
+> show <id> <pos>	// put a player on screen manually. you can see the id with the split or live commands. pos is the position on the screen, 1 for main, 2 3 4 for the side.
+> hide <id>		// hide a player for their current split. they can be shown again once they get to the next split. useful when someone dies.
+> unhide		// unhides all hidden players.
+> live			// list all registered players who are marked as live.
+> toggleLive		// if someone isn't live you can toggle their status.
+
+when the seed is over:
+> comp 0		// show completions for the seed
+> setSeed <number>	// (optional) to make sure you're entering the correct seed. it should always be correct but you can do this just in case.
+> autodl		// download match data from ranked api
+> lb <number>		// show the leaderboard after a number of seeds, so after seed 1 for example.
+
+when ready to start the next seed (after seed 1):
+> next			// show the next seed. updates the seed number variable and the seed number on obs.
+> main p		// switch to main screen when loaded in. shows the 4 people with the most points who are live.
+> timer game		// start the timer for the seed
+
+when it's time for break:
+> scene co		// switch from leaderboard to commentators. explain the break and how long it's gonna be.
+> scene im		// switch to intermission. set the countdown timer on obs. or just use whatever you had at the start.
+
+after break:
+> scene co		// switch to commentators. welcome people back after the intermission.
+> scene lb		// show the leaderboard again. (optional)
+> scene sl		// show the seed order again. (optional)
+
+ending stream after the final leaderboard:
+> scene co		// switch to commentators. say goodbye.
+> scene im		// switch to intermission. end stream on obs.
