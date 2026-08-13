@@ -31,6 +31,9 @@ public class Main {
 
         JSONObject obsLayout = readJSON(new File("obs_layout.json"));
 
+        int portRange = obsLayout.getInt("portRange"); // ports for streamlink feeds, they are this value + playerId
+        boolean useStreamlink = obsLayout.getBoolean("useStreamlink");
+
         JSONArray bH = obsLayout.getJSONArray("boardHeight");
         int[] boardHeight = new int[bH.length()];
         for (int i = 0; i < boardHeight.length; i++) boardHeight[i] = bH.getInt(i);
@@ -61,7 +64,7 @@ public class Main {
 
         FileSelect fs = new FileSelect();
 
-        Client client = new Client(new URI("ws://127.0.0.1:4455"), enableSocket);
+        Client client = new Client(new URI("ws://127.0.0.1:4455"), enableSocket, useStreamlink);
         if (client.enable) client.connect();
 
         Scanner scanner = new Scanner(System.in);
@@ -199,7 +202,7 @@ public class Main {
                     if (safety > 4) safety = 4;
 
                     for (int i = 0; i < safety; i++) {
-                        client.showPlayer(data.getPlayer(povs[i]), i + 1, imagePath, false);
+                        client.showPlayer(data.getPlayer(povs[i]), i + 1, imagePath, portRange, false);
                     }
 
                     client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + ((JSONObject) scenes.get("gameplayScenes")).get("gameplay" + safety) + "\"}}}");
@@ -218,7 +221,7 @@ public class Main {
                     d = Integer.parseInt(c);
                 } catch (Exception e) {}
                 if (b < data.players.length & d >= 1 & d <= 4) {
-                    if (data.players[b].live) if (client.enable) client.showPlayer(data.players[b], d, imagePath);
+                    if (data.players[b].live) if (client.enable) client.showPlayer(data.players[b], d, imagePath, portRange);
                     System.out.println("Done!");
                 } else System.out.println("Index out of range");
             }
@@ -517,10 +520,9 @@ public class Main {
                 client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + scenes.get("leaderboardScene") + "\"}}}");
             }
 
-            if (s.equals("request")) {
-                
+            if (s.equals("killFeeds")) {
+                Streamlink.killAll();
             }
-
 
             if (s.equals("comp")) {
                 
@@ -566,10 +568,20 @@ public class Main {
             if (s.equals("addPlayer")) {
                 needSave = true;
                 String a = scanner.next();
-                
-                System.out.println("their twitch / none");
-                System.out.print("twitch = ");
-                String b = scanner.next();
+
+                String apiTwitch = getTwitchFromRanked(a);
+                String b;
+
+                if (apiTwitch != null) {
+                    b = apiTwitch;
+                    System.out.println("got twitch from ranked api");
+                    System.out.println("twitch = " + b);
+                } else {
+                    System.out.println("their twitch / none");
+                    System.out.print("twitch = ");
+                    b = scanner.next();
+                }
+
                 data.addPlayer(a, b);
                 System.out.println("Done!");
                 System.out.println();
@@ -600,6 +612,27 @@ public class Main {
                     String c = scanner.next();
                     System.out.println("Done!");
                     data.editTwitch(b, c);
+                } else System.out.println("Index out of range");
+            }
+
+            if (s.equals("getTwitch")) {
+                needSave = true;
+                int a = scanner.nextInt();
+                if (a < data.players.length) {
+                    System.out.println("Trying to get twitch from ranked api");
+                    String twitch = getTwitchFromRanked(data.players[a].name);
+                    if (twitch != null) {
+                        System.out.println("Twitch: " + twitch);
+                        System.out.println("accept (Y/n)");
+                        String n = scanner.next();
+                        if (n.toLowerCase().equals("n")) {
+                            System.out.println("Not replacing twitch");
+                        } else {
+                            System.out.println("Replacing twitch");
+                            data.players[a].twitch = twitch;
+                        }
+                    } else System.out.println("Twitch is null, either command failed or it's not linked");
+
                 } else System.out.println("Index out of range");
             }
 
@@ -688,6 +721,7 @@ public class Main {
         scanner.close();
         snapshot.stop();
         timer.stop();
+        Streamlink.killAll();
 
         if (client.enable) client.close();
     }
@@ -897,6 +931,51 @@ public class Main {
         File file = new File("runtime_data.json");
         JSONObject object = readJSON(file);
         return object;
+    }
+
+    static String getTwitchFromRanked(String username) throws MalformedURLException, IOException, URISyntaxException {
+        File file = new File("player_request.json");
+
+        BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/users/" + username).toURL().openStream());
+        FileOutputStream out = new FileOutputStream(file);
+        byte dataBuffer[] = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+            out.write(dataBuffer, 0, bytesRead);
+        }
+        out.close();
+
+        JSONObject user = readJSON(file);
+        if (user == null) return null;
+        String status = user.getString("status");
+        if (status != null && status.equals("success")) {
+            JSONObject data = user.getJSONObject("data");
+            JSONObject connections;
+            try {
+                connections = data.getJSONObject("connections");
+            } catch (JSONException e) {
+                connections = null;
+            }
+            if (connections != null) {
+                JSONObject twitch;
+                try {
+                    twitch = connections.getJSONObject("twitch");
+                } catch (JSONException e) {
+                    twitch = null;
+                }
+                if (twitch != null) {
+                    String id;
+                    try {
+                        id = twitch.getString("id");
+                    } catch (JSONException e) {
+                        id = null;
+                    }
+                    if (id != null) return id;
+                }
+            }
+        }
+
+        return null;
     }
 
 }

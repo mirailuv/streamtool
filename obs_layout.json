@@ -45,5 +45,8 @@
 		"heads": "/home/me/MCRL Streaming/streamtool/out_heads/",
 		"seed_icons": "/home/me/MCRL Streaming/StreamAssets/Assets/seedtype-icons/",
 		"seed_images": "/home/me/MCRL Streaming/StreamAssets/Assets/seed_background/"
-	}
+	},
+
+	"useStreamlink" : true,
+	"portRange": 7000
 }

@@ -6,32 +6,37 @@ import java.net.URI;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.json.JSONObject;
 
 class Client extends WebSocketClient {
 
     boolean enable = true;
     Player[] povs = new Player[4];
+    boolean useStreamlink;
+    Streamlink[] feeds = new Streamlink[4];
     Log log;
 
-    public Client(URI uri, boolean enable) {
+    public Client(URI uri, boolean enable, boolean useStreamlink) {
         super(uri);
         log = new Log(new File("websocket_log.txt"), true);
         for (int i = 0; i < povs.length; i++) povs[i] = null;
         this.enable = enable;
+        this.useStreamlink = useStreamlink;
         if (!enable) this.close();
     }
 
-    int showPlayer(Player player, int place, String imagePath) throws IOException {
-        return showPlayer(player, place, imagePath, true);
+    int showPlayer(Player player, int place, String imagePath, int portRange) throws IOException {
+        return showPlayer(player, place, imagePath, portRange, true);
     }
 
-    int showPlayer(Player player, int place, String imagePath, boolean allowReplace) throws IOException {
+    int showPlayer(Player player, int place, String imagePath, int portRange, boolean allowReplace) throws IOException {
         if (!enable) return 5;
         if (place < 1 | place > 4) return 2;
         if (!player.live) return 3;
 
         String nameSlot = "pov" + place + "name";
+        String feedInput = "feed" + place;
+        int feedPort = portRange + place;
+        String feedLink = "http://localhost:" + feedPort;
         String name = player.name;
         String image = imagePath + name + ".png";
         String twitch = player.twitch;
@@ -48,45 +53,24 @@ class Client extends WebSocketClient {
 
             if (check > 0) {
                 Player swapPlayer = povs[place - 1];
-                if (swapPlayer != null) showPlayer(swapPlayer, check, imagePath, false);
+                if (swapPlayer != null) showPlayer(swapPlayer, check, imagePath, portRange, false);
             }
         }
 
         povs[place - 1] = player;
 
-
         this.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"head" + place + "\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + image + "\"}}}}");
 
-        JSONObject a = new JSONObject("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"pov1name\", \"overlay\": true, \"inputSettings\": {\"text\":\"NAME\"}}}}");
-        JSONObject b = (JSONObject) a.get("d");
-        JSONObject c = (JSONObject) b.get("requestData");
+        this.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"" + nameSlot + "\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + name + "\"}}}}");
 
-        JSONObject d = (JSONObject) c.get("inputSettings");
-        d.put("text", name);
-
-        c.put("inputName", nameSlot);
-        c.put("inputSettings", d);
-
-        b.put("requestData", c);
-        a.put("d", b);
-
-        this.send(a.toString());
-
-        JSONObject e = new JSONObject("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"pov1\", \"overlay\": true, \"inputSettings\": {\"url\":\"https://player.twitch.tv/?channel=NAME&enableExtensions=true&muted=true&parent=twitch.tv&player=popout&quality=chunked\"}}}}");
-        JSONObject f = (JSONObject) e.get("d");
-        JSONObject g = (JSONObject) f.get("requestData");
-        JSONObject h = (JSONObject) g.get("inputSettings");
-
-        h.put("url", link);
-
-        g.put("inputName", linkSlot);
-        g.put("inputSettings", h);
-
-        f.put("requestData", g);
-        e.put("d", f);
-
-        this.send(e.toString());
-
+        if (useStreamlink) {
+            if (feeds[place - 1] != null) feeds[place - 1].stop();
+            feeds[place - 1] = new Streamlink(twitch, feedPort);
+            feeds[place - 1].start();
+            this.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \""+ feedInput +"\", \"overlay\": true, \"inputSettings\": {\"input\":\"" + feedLink + "\"}}}}");
+        } else {
+            this.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \""+ linkSlot +"\", \"overlay\": true, \"inputSettings\": {\"url\":\"" + link + "\"}}}}");
+        }
 
         return 1;
     }
