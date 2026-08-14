@@ -33,7 +33,8 @@
 			"gameplay2": "MAIN 2",
 			"gameplay3": "MAIN 3",
 			"gameplay4": "MAIN 4"
-		}
+		},
+		"interviewScene": "INTERVIEW"
 	},
 	"audio": {
 		"mic": "Mic/Aux",

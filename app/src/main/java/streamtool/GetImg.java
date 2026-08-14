@@ -19,4 +19,16 @@ public class GetImg {
 
         out.close();
     }
+
+    public static void getInterviewImg(String name) throws IOException, URISyntaxException {
+        BufferedInputStream in = new BufferedInputStream(new URI("https://mc-heads.net/body/" + name).toURL().openStream());
+        FileOutputStream out = new FileOutputStream("interview.png");
+        byte dataBuffer[] = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+            out.write(dataBuffer, 0, bytesRead);
+        }
+
+        out.close();
+    }
 }

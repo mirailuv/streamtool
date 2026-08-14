@@ -410,10 +410,30 @@ public class Main {
                         setMute(client, audio, muted);
                         client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + scenes.get("completionScene") + "\"}}}");
                         break;
+                    case "iv", "interview":
+                        System.out.println("Interview");
+                        muted = false;
+                        setMute(client, audio, muted);
+                        client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + scenes.get("interviewScene") + "\"}}}");
+                        break;
                     default:
                         System.out.println("Unknown scene");
                         break;
                 }
+            }
+
+            if (s.equals("interview")) {
+                String player = scanner.next();
+
+                System.out.println("Interview: " + player);
+
+                GetImg.getInterviewImg(player);
+                client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"interview player\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + player + "\"}}}}");
+
+                muted = false;
+                setMute(client, audio, muted);
+                client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + scenes.get("interviewScene") + "\"}}}");
+
             }
 
             if (s.equals("host")) {
