@@ -33,6 +33,10 @@ set yourself as the host, in order to get the match data for leaderboard. clear 
 > host <username>
 > clear
 
+select 4 people to show on mainstream at the start. you can use the random pick and just replace whoever's not live.
+> main r
+> show <id> <pos>
+
 switch to the intermission scene. set the timer.
 > scene im
 > timer im <seconds>
@@ -42,9 +46,9 @@ go live!
 switching from intermission at the start:
 > scene co		// switch to commentator scene, do like an intro
 > scene sl		// show the seed order
-> scene ns		// show the first seed on a separate scene
-> main r		// switch to main screen once you've loaded into the minecraft world. shows 4 random people.
-> timer game		// start the timer for the seed-
+> scene ns		// show the first seed
+> scene pl 4		// switch to main screen once you've loaded into the minecraft world. shows 4 random people.
+> timer game		// start the timer for the seed
 
 useful commands during the seed:
 > split			// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
@@ -78,5 +82,6 @@ after break:
 > scene sl		// show the seed order again. (optional)
 
 ending stream after the final leaderboard:
-> scene co		// switch to commentators. say goodbye.
-> scene im		// switch to intermission. end stream on obs.
+> scene co		// switch to commentators.
+> scene iv		// switch to interview. (optional)
+> scene co		// switch back to commentators. say goodbye. end stream on obs.

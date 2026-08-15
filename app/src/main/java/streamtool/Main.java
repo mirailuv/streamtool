@@ -541,6 +541,7 @@ public class Main {
             }
 
             if (s.equals("killFeeds")) {
+                System.out.println("Killing all feeds");
                 Streamlink.killAll();
             }
 

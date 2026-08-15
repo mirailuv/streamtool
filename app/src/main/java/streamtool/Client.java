@@ -32,6 +32,9 @@ class Client extends WebSocketClient {
         if (!enable) return 5;
         if (place < 1 | place > 4) return 2;
         if (!player.live) return 3;
+        if (povs[place - 1] != null) {
+            if (povs[place - 1].name.equals(player.name)) return 4;
+        }
 
         String nameSlot = "pov" + place + "name";
         String feedInput = "feed" + place;

@@ -2,7 +2,10 @@
 close program.
 
 > restore
-restore previously imported data (players, seeds) after a crash.automatically mutes when switching to intermission and unmutes when switching to any other scene.
+restore previously imported data (players, seeds) after a crash.
+
+> killFeeds
+kill all previous streamlink player feed instances. they may stay running when you crash as it's an external program.
 
 > import
 import player list downloaded from the leagues bot after doing /list.
@@ -31,8 +34,11 @@ switches to the next seed scene and increments the current seed, so switching fr
 > setSeed seedNumber
 set the current seed number manually
 
-> scene im|ns|sl|sp|pl|lb|co|cm
-switch scene, im = intermission, ns = next seed, sl = seed list / seed order, sp = spectator cam, pl = players / main, lb = leaderboard, co = commentators, cm = completions. automatically mutes when switching to intermission and unmutes when switching to any other scene. for leaderboard and completions use the special commands (comp, lb) since they also update the data.
+> scene im|ns|sl|sp|pl|lb|co|cm|iv
+switch scene, im = intermission, ns = next seed, sl = seed list / seed order, sp = spectator cam, pl = players / main, lb = leaderboard, co = commentators, cm = completions, iv = interview. automatically mutes when switching to intermission and unmutes when switching to any other scene. for leaderboard and completions use the special commands (comp, lb) since they also update the data.
+
+> interview <playerIgn>
+switch to interview scene, set player's name and download their skin.
 
 > timer game|im <seconds>|advance <seconds>|stop
 set and start the timer. runs in a separate thread. game = start the timer for the seed, im = set and start intermission timer, advance = advance the time by a number of seconds, stop = stop the timer and timer thread.
@@ -63,6 +69,9 @@ get multiple match ids for a player. oldest match is listed first.
 
 > toggleLive playerId
 toggle player's live status. get playerId with list or live.
+
+> getTwitch playerId
+add someone's twitch from the ranked api if they have it
 
 > editTwitch playerId twitchName|none
 edit someone's twitch in case they misspelled it. get playerId with list / live / split. either include a twitch username or write "none".

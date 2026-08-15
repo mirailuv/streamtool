@@ -29,7 +29,7 @@
 		},
 		"spectatorScene": "SPECTATOR POV",
 		"gameplayScenes": {
-			"gameplay1": "player sources 1",
+			"gameplay1": "MAIN 1",
 			"gameplay2": "MAIN 2",
 			"gameplay3": "MAIN 3",
 			"gameplay4": "MAIN 4"
