@@ -589,7 +589,7 @@ public class Main {
                 needSave = true;
                 String a = scanner.next();
 
-                String apiTwitch = getTwitchFromRanked(a);
+                String apiTwitch = getTwitch(a);
                 String b;
 
                 if (apiTwitch != null) {
@@ -640,7 +640,7 @@ public class Main {
                 int a = scanner.nextInt();
                 if (a < data.players.length) {
                     System.out.println("Trying to get twitch from ranked api");
-                    String twitch = getTwitchFromRanked(data.players[a].name);
+                    String twitch = getTwitch(data.players[a].name);
                     if (twitch != null) {
                         System.out.println("Twitch: " + twitch);
                         System.out.println("accept (Y/n)");
@@ -951,6 +951,22 @@ public class Main {
         File file = new File("runtime_data.json");
         JSONObject object = readJSON(file);
         return object;
+    }
+
+    static String getTwitch(String username) {
+        String result;
+
+        try {
+            result = getTwitchFromRanked(username);
+        } catch (MalformedURLException e){
+            result = null;
+        } catch (IOException e) {
+            result = null;
+        } catch (URISyntaxException e) {
+            result = null;
+        }
+
+        return result;
     }
 
     static String getTwitchFromRanked(String username) throws MalformedURLException, IOException, URISyntaxException {

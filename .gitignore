@@ -9,6 +9,8 @@ lb_data
 out_heads
 output
 snapshots
+player_request.json
+interview.png
 runtime_data.json
 seed_order.json
 spectate_match.json
