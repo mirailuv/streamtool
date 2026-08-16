@@ -1015,6 +1015,24 @@ public class Main {
         return null;
     }
 
+    public static String getTimeString(int ms, boolean includeMs) {
+        String result = "";
+
+        if (ms > 0) {
+            int minutes = ms / 60000;
+            int seconds = (ms / 1000) - (minutes * 60);
+            int milliseconds = ms - (minutes * 60000) - (seconds * 1000);
+
+            if (minutes < 10) result = result + "0" + minutes; else result = result + minutes;
+            if (seconds < 10) result = result + ":0" + seconds; else result = result + ":" + seconds;
+            if (includeMs) {
+                if (milliseconds < 10) result = result + ".00" + milliseconds; else if (milliseconds < 100) result = result + ".0" + milliseconds; else result = result + "." + milliseconds;
+            }
+        }
+
+        return result;
+    }
+
 }
 
 class Player {

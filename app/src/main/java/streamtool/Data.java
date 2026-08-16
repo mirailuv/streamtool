@@ -118,9 +118,6 @@ public class Data {
 
         List<JSONObject> playerList = new ArrayList<>();
 
-
-        // TODO hideSplit
-        // need to confirm if this works, if it doesn't remove the hideSplit part
         for (int i = 0; i < players.length; i++) if (players[i].playing & players[i].live & players[i].hideSplit < currentSplit(players[i].name).getInt("split")) {
             JSONObject player = currentSplit(players[i].name);
             playerList.add(player);
@@ -158,8 +155,6 @@ public class Data {
             String name = pl.getString("name");
             Player player = getPlayer(name);
 
-            // TODO hideSplit
-            // need to confirm if this works, if it doesn't remove the hideSplit part
             if (player.playing & player.live & player.hideSplit < currentSplit(player.name).getInt("split")) playerList.add(pl);
         }
 
@@ -257,8 +252,7 @@ public class Data {
 
         for (int i = 0; i < players.length; i++) if (players[i] != null & players[i].name.equals(playerName)) {
             result.put("split", 0);
-            //TODO if this crashes the program remove the random and replace it with 0
-            result.put("time", new Random().nextInt(0, 5000));
+            result.put("time", -1 * players[i].lb_points);
             return result;
         }
 
@@ -274,7 +268,7 @@ public class Data {
         for (int i = 0; i < forfeit.length; i++) if (!alreadyListed(forfeit[i].player)) {
             list(forfeit[i].player);
 
-            System.out.println("     " + forfeit[i].player + " FORFEIT " + forfeit[i].time);
+            System.out.println("     " + forfeit[i].player + " FORFEIT " + Main.getTimeString(forfeit[i].time, true));
         }
 
         System.out.println();
@@ -282,7 +276,7 @@ public class Data {
         for (int i = 0; i < finish.length; i++) if (!alreadyListed(finish[i].player)) {
             list(finish[i].player);
 
-            System.out.println("     " + finish[i].player + " FINISH " + finish[i].time);
+            System.out.println("     " + finish[i].player + " FINISH " + Main.getTimeString(finish[i].time, true));
         }
 
         for (int i = 0; i < end.length; i++) if (!alreadyListed(end[i].player)) {
@@ -291,7 +285,7 @@ public class Data {
             boolean live = false;
             if (p != null) live = p.live;
 
-            if (live) System.out.println("LIVE " + p.id + " " + end[i].player + " END " + end[i].time); else System.out.println("     " + end[i].player + " END " + end[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + end[i].player + " END " + Main.getTimeString(end[i].time, true)); else System.out.println("     " + end[i].player + " END " + Main.getTimeString(end[i].time, true));
         }
 
         for (int i = 0; i < stronghold.length; i++) if (!alreadyListed(stronghold[i].player)) {
@@ -299,7 +293,7 @@ public class Data {
             Player p = this.getPlayer(stronghold[i].player);
             boolean live = false;
             if (p != null) live = p.live;
-            if (live) System.out.println("LIVE " + p.id + " " + stronghold[i].player + " STRONGHOLD " + stronghold[i].time); else System.out.println("     " + stronghold[i].player + " STRONGHOLD " + stronghold[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + stronghold[i].player + " STRONGHOLD " + Main.getTimeString(stronghold[i].time, true)); else System.out.println("     " + stronghold[i].player + " STRONGHOLD " + Main.getTimeString(stronghold[i].time, true));
         }
 
         for (int i = 0; i < blind.length; i++) if (!alreadyListed(blind[i].player)) {
@@ -307,7 +301,7 @@ public class Data {
             Player p = this.getPlayer(blind[i].player);
             boolean live = false;
             if (p != null) live = p.live;
-            if (live) System.out.println("LIVE " + p.id + " " + blind[i].player + " BLIND " + blind[i].time); else System.out.println("     " + blind[i].player + " BLIND " + blind[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + blind[i].player + " BLIND " + Main.getTimeString(blind[i].time, true)); else System.out.println("     " + blind[i].player + " BLIND " + Main.getTimeString(blind[i].time, true));
         }
 
         for (int i = 0; i < fortress.length; i++) if (!alreadyListed(fortress[i].player)) {
@@ -315,7 +309,7 @@ public class Data {
             Player p = this.getPlayer(fortress[i].player);
             boolean live = false;
             if (p != null) live = p.live;
-            if (live) System.out.println("LIVE " + p.id + " " + fortress[i].player + " FORTRESS " + fortress[i].time); else System.out.println("     " + fortress[i].player + " FORTRESS " + fortress[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + fortress[i].player + " FORTRESS " + Main.getTimeString(fortress[i].time, true)); else System.out.println("     " + fortress[i].player + " FORTRESS " + Main.getTimeString(fortress[i].time, true));
         }
 
         for (int i = 0; i < bastion.length; i++) if (!alreadyListed(bastion[i].player)) {
@@ -323,7 +317,7 @@ public class Data {
             Player p = this.getPlayer(bastion[i].player);
             boolean live = false;
             if (p != null) live = p.live;
-            if (live) System.out.println("LIVE " + p.id + " " + bastion[i].player + " BASTION " + bastion[i].time); else System.out.println("     " + bastion[i].player + " BASTION " + bastion[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + bastion[i].player + " BASTION " + Main.getTimeString(bastion[i].time, true)); else System.out.println("     " + bastion[i].player + " BASTION " + Main.getTimeString(bastion[i].time, true));
         }
 
         for (int i = 0; i < nether.length; i++) if (!alreadyListed(nether[i].player)) {
@@ -331,7 +325,7 @@ public class Data {
             Player p = this.getPlayer(nether[i].player);
             boolean live = false;
             if (p != null) live = p.live;
-            if (live) System.out.println("LIVE " + p.id + " " + nether[i].player + " NETHER " + nether[i].time); else System.out.println("     " + nether[i].player + " NETHER " + nether[i].time);
+            if (live) System.out.println("LIVE " + p.id + " " + nether[i].player + " NETHER " + Main.getTimeString(nether[i].time, true)); else System.out.println("     " + nether[i].player + " NETHER " + Main.getTimeString(nether[i].time, true));
         }
 
         for (int i = 0; i < players.length; i++) if (players[i].playing && !alreadyListed(players[i].name)) {
