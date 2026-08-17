@@ -8,8 +8,6 @@ make sure obs websocket is enabled with port 4455 and authentication disabled.
 create a symbolic link to spectate_match.json in the folder where you run the program. it must be named spectate_match.json as well.
 $ ln -s path/to/spectate_match.json spectate_match.json
 
-optionally, create a virtual audio device with pipewire and use qpwgraph to connect your discord audio to it, in order to isolate discord audio from other system audio.
-
 start obs. if you want fullscreen preview projector on wayland run it in xcb mode. the side effect is that obs will sometimes just freeze when you're interacting with it. that's fine as long as you don't need to change any settings. scene switching is handled by this program. all you should have to do in obs is press go live.
 run this program with java. there's a bit of delay at the start to make sure websocket is connected.
 on discord, in the league-specific channel, type /list and download the file.
