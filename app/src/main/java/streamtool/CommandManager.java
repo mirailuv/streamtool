@@ -158,7 +158,7 @@ public class CommandManager {
                 System.out.println("Set override: " + var + " = " + value);
                 run.overrides[3] = value;
                 return 1;
-            case "points":
+            case "playercount":
                 System.out.println("Set override: " + var + " = " + value);
                 run.overrides[4] = value;
                 return 1;

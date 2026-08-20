@@ -4,77 +4,77 @@ close program.
 > restore
 restore previously imported data (players, seeds) after a crash.
 
-> killFeeds
+> killfeeds
 kill all previous streamlink player feed instances. they may stay running when you crash as it's an external program.
 
 > import
 import player list downloaded from the leagues bot after doing /list.
 
-> getOrder
-get the seed order from the new api, must import players first. creates a file named seed_order.json that you can import with importSeeds.
+> order {
+	file	// get seed order from a file
+	api	// get seed order from api
+	show	// switch to seed order scene
+	skip	// remove a seed from the order and move it to the end. in case there's a need for a replay.
+}
 
-> importSeeds
-import the seed order, you can get it with getOrder or make a file manually.
 
-> toggleMute
-mute or unmute on stream.
+> mute (true|false)
+set mute status on stream, works as a toggle with no argument
 
-> main p|s|h|r
-update players on screen and switch to player screen, p = by points, s = by splits, h = 1st by splits, rest by points, r = randomly.
+> update (
+	auto	// enable auto-update. this is automatically done when you start the game timer.
+	stop	// disable auto-update. this is done automatically when timer ends or is stopped.
+	random	// put random povs on the screen. does not check if they're playing.
+)
+runs update function once with no argument. switches to game scene.
 
 > split
 show splits from spectate_match.json, only shows people who have entered the nether. shows playerId for people who are live.
 
-> show playerId 1|2|3|4
-put a selected player on screen, get playerId with list / live / split.
+> show player (1|2|3|4)
+put a selected player on screen. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player. if no position is selected, defaults to 1.
 
 > next
-switches to the next seed scene and increments the current seed, so switching from seed 1 to seed 2 for example. for the first seed use scene ns.
+switches to the next seed scene and increments the current seed, so switching from seed 1 to seed 2 for example.
 
-> setSeed seedNumber
-set the current seed number manually
+> setseed seedNumber
+set the current seed number manually. seedNumber must be integer between 1 and seed count.
 
 > scene im|ns|sl|sp|pl|lb|co|cm|iv
 switch scene, im = intermission, ns = next seed, sl = seed list / seed order, sp = spectator cam, pl = players / main, lb = leaderboard, co = commentators, cm = completions, iv = interview. automatically mutes when switching to intermission and unmutes when switching to any other scene. for leaderboard and completions use the special commands (comp, lb) since they also update the data.
 
-> interview <playerIgn>
-switch to interview scene, set player's name and download their skin.
+> interview player
+select player to interview and switch to interview scene. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player.
 
-> timer game|im <seconds>|advance <seconds>|stop
-set and start the timer. runs in a separate thread. game = start the timer for the seed, im = set and start intermission timer, advance = advance the time by a number of seconds, stop = stop the timer and timer thread.
+> timer {
+game			// start the timer for the seed. also starts auto-update.
+im seconds		// set and start the intermission timer. seconds must be integer.
+advance|add seconds	// add seconds to the timer.
+stop			// stop the timer.
+}
 
-> lb seedNumber
-show the leaderboard after specified seed. probably crashes if the match data doesn't exist.
+> lb|leaderboard (seedNumber)
+show the leaderboard after the current seed. attempts to download match data if missing only the current seed, effectively an auto-import. you can also provide the seed number if you want the standings after a specific seed.
 
-> comp 0|seedNumber
-show the completions. comp 0 shows them from spectate_match.json & comp seedNumber shows them from downloaded match data.
+> comp|completions (seedNumber)
+show the completions. shows them for current seed from spectate_match.json if no argument is provided. if seedNumber is provided, shows them for the specific seed from match data.
 
-> clear
-delete currently downloaded match data. do this at the start to clear any previous match data.
+> match {
+	clear			// clear match data. run this at the start.
+	autodl			// try to download the most recent match from the host as current seed.
+	id (count)		// get a number of recent matchIds from the host. prints starting with oldest. count defaults to 1.
+	host username		// set host to username. this is used to download match data.
+	dl seedNumber matchId	// manually download match data for a specific seed with a specific matchId
+}
 
-> host hostName
-set the host, to easily get the match data from api
+> setlive player (true|false)
+mark a player as live or not live. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player. if no boolean is provided, toggles their current status.
 
-> autodl
-download the most recent match by the host as current seed. works basically the same as /import for leagues bot.
+> twitch player (twitchName)
+set player's twitch if they didn't provide one or misspelt it. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player. if no twitchName is provided, tries to get one from ranked api.
 
-> dl seedNumber matchId
-download the match data for a specific seed with matchId.
-
-> getid player
-get the most recent match id for a player
-
-> getids player count
-get multiple match ids for a player. oldest match is listed first.
-
-> toggleLive playerId
-toggle player's live status. get playerId with list or live.
-
-> getTwitch playerId
-add someone's twitch from the ranked api if they have it
-
-> editTwitch playerId twitchName|none
-edit someone's twitch in case they misspelled it. get playerId with list / live / split. either include a twitch username or write "none".
+> addplayer username
+add a new player. will try to get their twitch from ranked api. generally, don't use this, just re-import the player file if new people join.
 
 > list
 list all imported players and their ids.
@@ -82,20 +82,23 @@ list all imported players and their ids.
 > live
 list all players who are live and their ids.
 
-> hide playerId
-hide a player from stream until their next split. useful if someone dies. get playerId with list / live / split. hide status is reset with next command. to hide someone permanently use toggleLive.
+> hide player
+hide a player from stream until their next split. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player.
 
 > unhide
-unhides all hidden players. should do this if you're running out of povs.
+unhides all hidden players.
 
 > reload
 reload obs configuration file.
 
-> override 0|1|2|3 value
-override leaderboard values, 0 = promotion count, 1 = demotion count, 2 = lb1 length, 3 = lb2 length
+> override {
+	promotions|demotions|lb1|lb2|playercount value		// override a specific value for leaderboard gen and display
+	reset							// reset overrides
+}
 
-> addPlayer name twitchName|none
-add a new player after importing the player list. don't use this, just download the new list from ranked bot and use import. either include a twitch username or write "none". if you include a username the player will be set as live.
-
-> snapshot start|stop|status
-saves snapshots of spectate_match.json every 10 seconds. runs on a separate thread. exists to save data for testing. don't use this.
+> snapshot (
+	start	// store a snapshot of spectate_match.json every 10 seconds.
+	stop	// stop the tool.
+	load	// load stored snapshots sequentially to simulate a match.
+)
+testing command. don't use this.

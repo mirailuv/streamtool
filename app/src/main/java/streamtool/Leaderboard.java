@@ -164,6 +164,10 @@ public class Leaderboard {
 
         int completionPoints = regList.length / 2;
 
+        if (run.overrides[4] != -1) completionPoints = run.overrides[4] / 2;
+
+        if (completionPoints < 0) completionPoints = 0;
+
         for (int i = 0; i < regList.length; i++) {
             regList[i].lb_points = 0;
             regList[i].lb_comps = 0;

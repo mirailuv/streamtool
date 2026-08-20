@@ -379,7 +379,7 @@ public class CommandParser {
                     IntParser ip = parseInt(s);
                     if (ip.success) {
                         switch (var) {
-                            case "promotions", "demotions", "lb1", "lb2", "points", "reset":
+                            case "promotions", "demotions", "lb1", "lb2", "playercount", "reset":
                                 result.put("var", var);
                                 result.put("value", ip.i);
                                 break;

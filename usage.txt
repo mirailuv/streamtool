@@ -9,67 +9,61 @@ import the player file.
 > import
 this will open a file selector window, navigate to downloads and select the file. it updates the league information in obs.
 
-use getOrder command to get the seed order from an api, or alternatively copy the example file and input the order manually.
-> getOrder
-this downloads the seed order into a file named seed_order.json in the same folder you're running the program in.
-
-then import the seed order.
-> importSeeds
-this opens a file selector again, navigate and select the seed order file, either one from the api or one you made yourself. it updates the seed order and time limit in obs and sets current seed to 1.
+use getOrder command to get the seed order from an api or a file
+> order api
+this downloads and imports the seed order and sets current seed to 0
+> order file
+opens a file selector, you can select the file. imports the order and sets current seed to 0
 
 set yourself as the host, in order to get the match data for leaderboard. clear any previous match data.
-> host <username>
-> clear
-
-select 4 people to show on mainstream at the start. you can use the random pick and just replace whoever's not live.
-> main r
-> show <id> <pos>
+> match host username
+> match clear
 
 switch to the intermission scene. set the timer.
 > scene im
-> timer im <seconds>
+> timer im seconds
 
-go live!
+go live on obs.
 
 switching from intermission at the start:
-> scene co		// switch to commentator scene, do like an intro
-> scene sl		// show the seed order
-> scene ns		// show the first seed
-> scene pl 4		// switch to main screen once you've loaded into the minecraft world. shows 4 random people.
-> timer game		// start the timer for the seed
+> scene co		// switch to commentator scene, do like an intro.
+> order show		// show the seed order.
+> next			// increment the current seed, so from 0 to 1. shows the seed type.
+> update		// switch to main screen when loaded in. initially shows the first 4 people on reglist who are live.
+> timer game		// start the timer for the seed. enables auto-update.
 
 useful commands during the seed:
-> split			// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
-> main s		// show the top 4 people by splits. only do this once 4 of the people who are live have entered nether. you should be doing this periodically to update the current top 4.
-> main h		// you can use this when the 1st person with a livestream enters nether but only on seed 2 or later. if you do this on seed 1 it will crash because there's no leaderboard data yet.
-> main p		// show the top 4 live players by points. this could be useful combined with selective player hiding to show a close race for promotions for example.
-> show <id> <pos>	// put a player on screen manually. you can see the id with the split or live commands. pos is the position on the screen, 1 for main, 2 3 4 for the side.
-> hide <id>		// hide a player for their current split. they can be shown again once they get to the next split. useful when someone dies.
-> unhide		// unhides all hidden players.
-> live			// list all registered players who are marked as live.
-> toggleLive		// if someone isn't live you can toggle their status.
+> split				// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
+> update stop			// disable auto-update
+> update auto			// enable auto-update
+> update			// update manually if you turned off auto-update
+> show player position		// put a player on screen manually.
+> hide player			// hide a player for their current split. they can be shown again once they get to the next split.
+> unhide			// unhides all hidden players.
+> live				// list all registered players who are marked as live.
+> setlive player (true|false)	// set or toggle someone's live status.
 
 when the seed is over:
-> comp 0		// show completions for the seed
-> setSeed <number>	// (optional) to make sure you're entering the correct seed. it should always be correct but you can do this just in case.
-> autodl		// download match data from ranked api
-> lb <number>		// show the leaderboard after a number of seeds, so after seed 1 for example.
+> comp			// show completions for the seed. disables auto-update if the timer hasn't ended yet.
+> leaderboard		// downloads match data, generates leaderboard and switches to leaderboard scene.
 
-when ready to start the next seed (after seed 1):
-> next			// show the next seed. updates the seed number variable and the seed number on obs.
-> main p		// switch to main screen when loaded in. shows the 4 people with the most points who are live.
-> timer game		// start the timer for the seed
+when ready to start the next seed:
+> next			// increment the current seed. shows the seed type.
+> update		// switch to main screen when loaded in. after seed 1 shows people with the most points at the start.
+> timer game		// start the timer for the seed. enables auto-update.
 
 when it's time for break:
 > scene co		// switch from leaderboard to commentators. explain the break and how long it's gonna be.
-> scene im		// switch to intermission. set the countdown timer on obs. or just use whatever you had at the start.
+> scene im		// switch to intermission.
+> timer im seconds	// set the intermission timer.
 
 after break:
 > scene co		// switch to commentators. welcome people back after the intermission.
-> scene lb		// show the leaderboard again. (optional)
-> scene sl		// show the seed order again. (optional)
+> leaderboard		// show the leaderboard again. (optional)
+> order show		// show the seed order again. (optional)
+// then just start the next seed with the previous instructions.
 
-ending stream after the final leaderboard:
+interview and ending stream:
 > scene co		// switch to commentators.
-> scene iv		// switch to interview. (optional)
+> interview player	// switch to interview. (optional)
 > scene co		// switch back to commentators. say goodbye. end stream on obs.
