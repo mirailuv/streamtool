@@ -19,9 +19,25 @@ import org.json.JSONObject;
 
 public class Leaderboard {
 
-    public static void downloadSeed(int seedNumber, int matchId) throws MalformedURLException, IOException, URISyntaxException {
+    public static boolean downloadSeed(int seedNumber, int matchId, RuntimeData run) {
+        try {
+            downloadSeedUnsafe(matchId);
+            boolean setId = run.setMatchId(seedNumber, matchId);
+            if (!setId) {
+                System.out.println("Failed to save match id");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("Download error");
+            return false;
+        }
+
+        return true;
+    }
+
+    static void downloadSeedUnsafe(int matchId) throws MalformedURLException, IOException, URISyntaxException {
         BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/matches/" + matchId).toURL().openStream());
-        FileOutputStream out = new FileOutputStream("lb_data/seeds/seed" + seedNumber + ".json");
+        FileOutputStream out = new FileOutputStream("lb_data/matches/" + matchId + ".json");
         byte dataBuffer[] = new byte[1024];
         int bytesRead;
         while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
@@ -29,7 +45,7 @@ public class Leaderboard {
         }
         out.close();
 
-        JSONObject matchData = Main.readJSON(new File("lb_data/seeds/seed" + seedNumber + ".json"));
+        JSONObject matchData = Main.readJSON(new File("lb_data/matches/" + matchId + ".json"));
         JSONObject data = matchData.getJSONObject("data");
         JSONArray completions = data.getJSONArray("completions");
         JSONArray players = data.getJSONArray("players");
@@ -142,7 +158,7 @@ public class Leaderboard {
         return result;
     }
 
-    public static void genLeaderboard(int seedcount, Data data) throws IOException {
+    public static boolean genLeaderboard(int seedcount, Data data, RuntimeData run) {
 
         Player[] regList = data.players;
 
@@ -156,7 +172,14 @@ public class Leaderboard {
         }
 
         for (int i = 1; i <= seedcount; i++) {
-            File file = new File("lb_data/seeds/seed"+i+".json");
+
+            int matchId = run.getMatchId(i);
+
+            if (matchId == -1) {
+                return false;
+            }
+
+            File file = new File("lb_data/matches/"+matchId+".json");
             String compKey = "completions";
             String uuidKey = "uuid";
 
@@ -269,9 +292,17 @@ public class Leaderboard {
         leaderboard.put("players", sortedLeaderboard);
 
         File file = new File("lb_data/leaderboard.json");
-        BufferedWriter w = new BufferedWriter(new FileWriter(file));
-        w.write(leaderboard.toString());
-        w.close();
+
+        try {
+            BufferedWriter w = new BufferedWriter(new FileWriter(file));
+            w.write(leaderboard.toString());
+            w.close();
+        } catch (IOException e) {
+            System.out.println("Failed to write leaderboard");
+            return false;
+        }
+
+        return true;
     }
 
     static int getTimeLimit(int leagueNumber) {

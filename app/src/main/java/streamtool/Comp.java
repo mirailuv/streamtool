@@ -3,21 +3,44 @@ package streamtool;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Comp {
-    public static JSONObject updateCompletions(Player[] regPlayers, int seedNumber) throws IOException {
+    public static JSONObject updateCompletions(Player[] regPlayers, int seedNumber, RuntimeData run) {
+        JSONObject result = null;
+        try {
+            result = updateCompletionsUnsafe(regPlayers, seedNumber, run);
+        } catch (Exception e) {
+            result = null;
+        }
+
+        return result;
+    }
+
+    public static JSONObject updateCompletionsUnsafe(Player[] regPlayers, int seedNumber, RuntimeData run) throws Exception {
         int completionPoints = regPlayers.length / 2;
+
+        
 
         File file;
         String compKey = "completes";
         String uuidKey = "player";
         boolean needData = false;
 
+        int matchId;
+
         if (seedNumber > 0) {
-            file = new File("lb_data/seeds/seed"+seedNumber+".json");
+
+            matchId = run.getMatchId(seedNumber);
+
+            if (matchId == -1) {
+                System.out.println("matchId not found");
+                throw new Exception("matchId");
+            }
+
+            file = new File("lb_data/matches/"+matchId+".json");
             compKey = "completions";
             uuidKey = "uuid";
             needData = true;
@@ -121,7 +144,7 @@ public class Comp {
         return returnData;
     }
 
-    public static String getName(String uuid, JSONArray players) throws IOException {
+    public static String getName(String uuid, JSONArray players) {
         String output = "";
 
         for (int i = 0; i < players.length(); i++) {

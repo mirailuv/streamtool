@@ -1,7 +1,6 @@
 package streamtool;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 import org.java_websocket.client.WebSocketClient;
@@ -24,11 +23,11 @@ class Client extends WebSocketClient {
         if (!enable) this.close();
     }
 
-    int showPlayer(Player player, int place, String imagePath, int portRange) throws IOException {
+    int showPlayer(Player player, int place, String imagePath, int portRange) {
         return showPlayer(player, place, imagePath, portRange, true);
     }
 
-    int showPlayer(Player player, int place, String imagePath, int portRange, boolean allowReplace) throws IOException {
+    int showPlayer(Player player, int place, String imagePath, int portRange, boolean allowReplace) {
         if (!enable) return 5;
         if (place < 1 | place > 4) return 2;
         if (!player.live) return 3;

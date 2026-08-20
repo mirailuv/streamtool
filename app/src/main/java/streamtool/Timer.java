@@ -2,7 +2,7 @@ package streamtool;
 
 public class Timer {
     Thread timer;
-    boolean isRunning;
+    boolean isRunning = false;
     Long startTime;
     Long nextUpdate;
     int duration;
@@ -44,10 +44,10 @@ public class Timer {
         };
     }
 
-    public Timer(Client client) {
+    public Timer(RuntimeData run) {
         isRunning = false;
         time = 0;
-        this.client = client;
+        this.client = run.client;
     }
 
     void start(int duration, boolean reverse, String sourceName, String endMessage) {

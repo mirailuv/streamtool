@@ -17,6 +17,8 @@ public class Data {
     int leagueNumber = 0;
     int weekNumber = 0;
 
+    int currentSeed = 0;
+
     enum SplitType {
         nether,
         bastion,
@@ -511,6 +513,12 @@ public class Data {
     Player getPlayer(String name) {
         if (name == null) return null;
         for (int i = 0; i < players.length; i++) if (name.equals(players[i].name)) return players[i];
+        return null;
+    }
+
+    Player getPlayerById(int id) {
+        if (id < 0) return null;
+        for (int i = 0; i < players.length; i++) if (id == players[i].id) return players[i];
         return null;
     }
 

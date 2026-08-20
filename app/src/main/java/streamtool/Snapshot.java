@@ -16,7 +16,9 @@ public class Snapshot {
     int saved;
     int seedNumber = 1;
 
-    Thread snapshotThread() {
+    int loadTracker = 0;
+
+    void snapshotThread() {
         snapshot = new Thread() {
             public void run() {
                 while(true) {
@@ -28,12 +30,12 @@ public class Snapshot {
                         Long time = System.currentTimeMillis() / 1000;
 
                         try {
-                            Files.createDirectories(Paths.get("snapshots/seed" + seedNumber));
+                            Files.createDirectories(Paths.get("snapshots"));
                         } catch (IOException e) {
                             // maybe add some exception logging?
                         }
 
-                        File file = new File("snapshots/seed" + seedNumber + "/spectate-" + time + ".json");
+                        File file = new File("snapshots/spectate-" + time + ".json");
 
                         try {
                             BufferedWriter w = new BufferedWriter(new FileWriter(file));
@@ -54,7 +56,41 @@ public class Snapshot {
                 System.out.println("Snapshot stopped");
             }
         };
-        return snapshot;
+    }
+
+    void snapshotLoadThread() {
+        snapshot = new Thread() {
+            public void run() {
+                while(true) {
+                    if (!isRunning) break;
+
+                    File file = new File("snapshots/spectate-" + loadTracker + ".json");
+                    JSONObject data = null;
+                    if (file.exists()) data = Main.readJSON(file);
+
+                    File spectate = new File("spectate_match.json");
+
+                    if (data != null) {
+                        try {
+                            BufferedWriter w = new BufferedWriter(new FileWriter(spectate));
+                            w.write(data.toString());
+                            w.close();
+                        } catch (IOException e) {
+                            // maybe add some exception logging?
+                        }
+                    }
+
+                    loadTracker++;
+
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        // maybe add some exception logging?
+                    }
+                }
+                System.out.println("Snapshot loader stopped");
+            }
+        };
     }
 
     public Snapshot() {
@@ -75,9 +111,23 @@ public class Snapshot {
         } else {
             saved = 0;
             isRunning = true;
-            snapshot = snapshotThread();
+            snapshotThread();
             snapshot.start();
             System.out.println("Snapshot started");
+        }
+    }
+
+    void load(int i) {
+        System.out.println("Start snapshot loader, from " + i);
+        if (snapshot != null && snapshot.isAlive()) {
+            System.out.println("Snapshot already running");
+        } else {
+            loadTracker = i;
+            saved = 0;
+            isRunning = true;
+            snapshotLoadThread();
+            snapshot.start();
+            System.out.println("Snapshot loader started");
         }
     }
 
