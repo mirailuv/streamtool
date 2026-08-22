@@ -752,7 +752,6 @@ public class CommandManager {
     }
 
     int updateCommand(JSONObject commandObject) {
-        // TODO update
 
         int value = commandObject.getInt("value");
         String[] povs = new String[0];

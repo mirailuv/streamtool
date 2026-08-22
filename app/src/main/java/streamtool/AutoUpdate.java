@@ -2,11 +2,6 @@ package streamtool;
 
 public class AutoUpdate {
 
-    // TODO make this
-    // separate thread that updates povs every second from spectate_match.json
-    // automatically stops when the timer runs out or when switching to completions
-    // can also be stopped manually with "update stop"
-
     boolean isRunning;
     RuntimeData run;
 
