@@ -741,7 +741,12 @@ public class CommandManager {
 
     int splitsCommand() {
         System.out.println("Splits");
-        data.updateSplits();
+        try {
+            data.updateSplits();
+        } catch (Exception e) {
+            System.out.println("Exception: Failed to update splits");
+            return 0;
+        }
         data.printSplits();
         return 1;
     }
@@ -911,7 +916,12 @@ public class CommandManager {
     int hideCommand(JSONObject commandObject) {
         int playerId = commandObject.getInt("id");
 
-        data.updateSplits();
+        try {
+            data.updateSplits();
+        } catch (Exception e) {
+            System.out.println("Exception: Failed to update splits");
+            return 0;
+        }
 
         for (int i = 0; i < data.players.length; i++) if (data.players[i].id == playerId) {
             Player player = data.players[i];

@@ -87,7 +87,6 @@ public class Data {
     }
 
     String[] randomPovs() { // returns 4 randomly selected people who are live
-        updateSplits();
 
         ArrayList<String> playerList = new ArrayList<>();
 
@@ -116,7 +115,12 @@ public class Data {
     }
 
     String[] topSplits() { // returns top players (up to 4) by splits
-        updateSplits();
+        try {
+            updateSplits();
+        } catch (Exception e) {
+            System.out.println("Exception: Failed to update splits");
+            return new String[0];
+        }
 
         List<JSONObject> playerList = new ArrayList<>();
 
@@ -145,7 +149,12 @@ public class Data {
     }
 
     String[] topPoints() { // returns top players (up to 4) by points
-        updateSplits();
+        try {
+            updateSplits();
+        } catch (Exception e) {
+            System.out.println("Exception: Failed to update splits");
+            return new String[0];
+        }
 
         JSONObject leaderboard = Main.readJSON(new File("lb_data/leaderboard.json"));
         JSONArray players = (JSONArray) leaderboard.get("players");
@@ -421,10 +430,15 @@ public class Data {
         }
     }
 
-    void updateSplits() {
+    void updateSplits() throws Exception {
         JSONObject spectate = Main.readJSON(new File("spectate_match.json"));
-        JSONArray players = (JSONArray) spectate.get("players");
-        JSONArray timelines = (JSONArray) spectate.get("timelines");
+
+        if (spectate == null) throw new Exception();
+
+        JSONArray players = (JSONArray) spectate.opt("players");
+        JSONArray timelines = (JSONArray) spectate.opt("timelines");
+
+        if (players == null || timelines == null) throw new Exception();
 
         updatePlaying(spectate);
         loadUuid(players);
