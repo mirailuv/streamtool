@@ -24,7 +24,7 @@ public class Snapshot {
                 while(true) {
                     if (!isRunning) break;
 
-                    JSONObject data = Main.readJSON(new File("spectate_match.json"));
+                    JSONObject data = Main.readJSON(Paths.get("spectate_match.json").toFile());
 
                     if (data != null) {
                         Long time = System.currentTimeMillis() / 1000;
@@ -35,7 +35,7 @@ public class Snapshot {
                             // maybe add some exception logging?
                         }
 
-                        File file = new File("snapshots/spectate-" + time + ".json");
+                        File file = Paths.get("snapshots", "spectate-"+time+".json").toFile();
 
                         try {
                             BufferedWriter w = new BufferedWriter(new FileWriter(file));
@@ -64,11 +64,12 @@ public class Snapshot {
                 while(true) {
                     if (!isRunning) break;
 
-                    File file = new File("snapshots/spectate-" + loadTracker + ".json");
+                    File file = Paths.get("snapshots", "spectate-"+loadTracker+".json").toFile();
+
                     JSONObject data = null;
                     if (file.exists()) data = Main.readJSON(file);
 
-                    File spectate = new File("spectate_match.json");
+                    File spectate = Paths.get("spectate_match.json").toFile();
 
                     if (data != null) {
                         try {

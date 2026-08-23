@@ -3,6 +3,7 @@ package streamtool;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,11 +41,12 @@ public class Comp {
                 throw new Exception("matchId");
             }
 
-            file = new File("lb_data/matches/"+matchId+".json");
+            file = Paths.get("lb_data", "matches", matchId+".json").toFile();
+
             compKey = "completions";
             uuidKey = "uuid";
             needData = true;
-        } else file = new File("spectate_match.json");
+        } else file = Paths.get("spectate_match.json").toFile();
 
         if (!file.exists()) return null;
 
@@ -61,13 +63,13 @@ public class Comp {
             }
         }
 
-        BufferedWriter w11 = new BufferedWriter(new FileWriter(new File("output/comp11.txt")));
-        BufferedWriter w12 = new BufferedWriter(new FileWriter(new File("output/comp12.txt")));
-        BufferedWriter w13 = new BufferedWriter(new FileWriter(new File("output/comp13.txt")));
+        BufferedWriter w11 = new BufferedWriter(new FileWriter(Paths.get("output","comp11.txt").toFile()));
+        BufferedWriter w12 = new BufferedWriter(new FileWriter(Paths.get("output","comp12.txt").toFile()));
+        BufferedWriter w13 = new BufferedWriter(new FileWriter(Paths.get("output","comp13.txt").toFile()));
 
-        BufferedWriter w21 = new BufferedWriter(new FileWriter(new File("output/comp21.txt")));
-        BufferedWriter w22 = new BufferedWriter(new FileWriter(new File("output/comp22.txt")));
-        BufferedWriter w23 = new BufferedWriter(new FileWriter(new File("output/comp23.txt")));
+        BufferedWriter w21 = new BufferedWriter(new FileWriter(Paths.get("output","comp21.txt").toFile()));
+        BufferedWriter w22 = new BufferedWriter(new FileWriter(Paths.get("output","comp22.txt").toFile()));
+        BufferedWriter w23 = new BufferedWriter(new FileWriter(Paths.get("output","comp23.txt").toFile()));
 
         int compLength = comp.length();
         if (compLength > 26) compLength = 26;

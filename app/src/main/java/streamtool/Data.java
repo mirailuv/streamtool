@@ -1,6 +1,6 @@
 package streamtool;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -156,7 +156,8 @@ public class Data {
             return new String[0];
         }
 
-        JSONObject leaderboard = Main.readJSON(new File("lb_data/leaderboard.json"));
+        JSONObject leaderboard = Main.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+
         JSONArray players = (JSONArray) leaderboard.get("players");
 
         List<JSONObject> playerList = new ArrayList<>();
@@ -431,7 +432,7 @@ public class Data {
     }
 
     void updateSplits() throws Exception {
-        JSONObject spectate = Main.readJSON(new File("spectate_match.json"));
+        JSONObject spectate = Main.readJSON(Paths.get("spectate_match.json").toFile());
 
         if (spectate == null) throw new Exception();
 

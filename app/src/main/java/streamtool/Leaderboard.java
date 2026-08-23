@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,8 +37,10 @@ public class Leaderboard {
     }
 
     static void downloadSeedUnsafe(int matchId) throws MalformedURLException, IOException, URISyntaxException {
+        File matchFile = Paths.get("lb_data", "matches", matchId+".json").toFile();
+
         BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/matches/" + matchId).toURL().openStream());
-        FileOutputStream out = new FileOutputStream("lb_data/matches/" + matchId + ".json");
+        FileOutputStream out = new FileOutputStream(matchFile);
         byte dataBuffer[] = new byte[1024];
         int bytesRead;
         while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
@@ -45,7 +48,7 @@ public class Leaderboard {
         }
         out.close();
 
-        JSONObject matchData = Main.readJSON(new File("lb_data/matches/" + matchId + ".json"));
+        JSONObject matchData = Main.readJSON(matchFile);
         JSONObject data = matchData.getJSONObject("data");
         JSONArray completions = data.getJSONArray("completions");
         JSONArray players = data.getJSONArray("players");
@@ -76,7 +79,7 @@ public class Leaderboard {
         int[] result = new int[count];
 
         BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/users/" + host + "/matches?type=3&count=" + count).toURL().openStream());
-        File file = new File("lb_data/id_request.json");
+        File file = Paths.get("lb_data", "id_request.json").toFile();
         FileOutputStream out = new FileOutputStream(file);
         byte dataBuffer[] = new byte[1024];
         int bytesRead;
@@ -99,13 +102,15 @@ public class Leaderboard {
 
     public static void clearSeeds() {
         for (int i = 1; i <= 8; i++) {
-            File file = new File("lb_data/seeds/seed" + i + ".json");
+            File file = Paths.get("lb_data", "seeds", "seed"+i+".json").toFile();
+
             if (file.exists()) file.delete();
         }
     }
 
     public static JSONObject loadLeaderboard(int[] overrides) throws IOException {
-        JSONObject leaderboard = Main.readJSON(new File("lb_data/leaderboard.json"));
+        JSONObject leaderboard = Main.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+
         JSONArray players = (JSONArray) leaderboard.get("players");
 
         int playerCount = players.length();
@@ -131,13 +136,13 @@ public class Leaderboard {
         result.put("promotions", promotions);
         result.put("demotions", demotions);
 
-        BufferedWriter w11 = new BufferedWriter(new FileWriter(new File("output/lb11.txt")));
-        BufferedWriter w12 = new BufferedWriter(new FileWriter(new File("output/lb12.txt")));
-        BufferedWriter w13 = new BufferedWriter(new FileWriter(new File("output/lb13.txt")));
+        BufferedWriter w11 = new BufferedWriter(new FileWriter(Paths.get("output", "lb11.txt").toFile()));
+        BufferedWriter w12 = new BufferedWriter(new FileWriter(Paths.get("output", "lb12.txt").toFile()));
+        BufferedWriter w13 = new BufferedWriter(new FileWriter(Paths.get("output", "lb13.txt").toFile()));
 
-        BufferedWriter w21 = new BufferedWriter(new FileWriter(new File("output/lb21.txt")));
-        BufferedWriter w22 = new BufferedWriter(new FileWriter(new File("output/lb22.txt")));
-        BufferedWriter w23 = new BufferedWriter(new FileWriter(new File("output/lb23.txt")));
+        BufferedWriter w21 = new BufferedWriter(new FileWriter(Paths.get("output", "lb21.txt").toFile()));
+        BufferedWriter w22 = new BufferedWriter(new FileWriter(Paths.get("output", "lb22.txt").toFile()));
+        BufferedWriter w23 = new BufferedWriter(new FileWriter(Paths.get("output", "lb23.txt").toFile()));
 
         for (int i = 0; i < page1; i++) {
             JSONObject player = (JSONObject) players.get(i);
@@ -183,7 +188,8 @@ public class Leaderboard {
                 return false;
             }
 
-            File file = new File("lb_data/matches/"+matchId+".json");
+            File file = Paths.get("lb_data", "matches", matchId+".json").toFile();
+
             String compKey = "completions";
             String uuidKey = "uuid";
 
@@ -295,7 +301,7 @@ public class Leaderboard {
 
         leaderboard.put("players", sortedLeaderboard);
 
-        File file = new File("lb_data/leaderboard.json");
+        File file = Paths.get("lb_data", "leaderboard.json").toFile();
 
         try {
             BufferedWriter w = new BufferedWriter(new FileWriter(file));

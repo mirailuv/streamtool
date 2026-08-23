@@ -1,7 +1,7 @@
 package streamtool;
 
-import java.io.File;
 import java.net.URI;
+import java.nio.file.Paths;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -16,7 +16,7 @@ class Client extends WebSocketClient {
 
     public Client(URI uri, boolean enable, boolean useStreamlink) {
         super(uri);
-        log = new Log(new File("websocket_log.txt"), true);
+        log = new Log(Paths.get("websocket_log.txt").toFile(), true);
         for (int i = 0; i < povs.length; i++) povs[i] = null;
         this.enable = enable;
         this.useStreamlink = useStreamlink;

@@ -23,7 +23,8 @@ public class Main {
 
     public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
 
-        Files.createDirectories(Paths.get("lb_data/matches"));
+        Files.createDirectories(Paths.get("lb_data", "matches"));
+
         Files.createDirectories(Paths.get("out_heads"));
         Files.createDirectories(Paths.get("output"));
 
@@ -32,7 +33,7 @@ public class Main {
         int[] overrides = {-1, -1, -1, -1, -1};
         run.overrides = overrides;
 
-        run.obsLayout = readJSON(new File("obs_layout.json"));
+        run.obsLayout = readJSON(Paths.get("obs_layout.json").toFile());
 
         run.portRange = run.obsLayout.getInt("portRange"); // ports for streamlink feeds, they are this value + playerId
         run.useStreamlink = run.obsLayout.getBoolean("useStreamlink");
@@ -134,7 +135,7 @@ public class Main {
     }
 
     static void downloadOrder(int leagueNumber, int weekNumber) throws MalformedURLException, IOException, URISyntaxException {
-        File file = new File("seed_order.json");
+        File file = Paths.get("seed_order.json").toFile();
         
         BufferedInputStream in = new BufferedInputStream(new URI("https://pastel-shrimp-251.convex.site/api/seeds/order?leagueNumber=" + leagueNumber).toURL().openStream());
         FileOutputStream out = new FileOutputStream(file);
@@ -309,7 +310,7 @@ public class Main {
 
         int[] matchIds = run.matchIds;
 
-        File file = new File("runtime_data.json");
+        File file = Paths.get("runtime_data.json").toFile();
         JSONObject object = new JSONObject();
         JSONArray playerList = new JSONArray();
 
@@ -339,7 +340,7 @@ public class Main {
     }
 
     static JSONObject getData() {
-        File file = new File("runtime_data.json");
+        File file = Paths.get("runtime_data.json").toFile();
         JSONObject object = readJSON(file);
         return object;
     }
@@ -361,7 +362,7 @@ public class Main {
     }
 
     static String getTwitchFromRanked(String username) throws MalformedURLException, IOException, URISyntaxException {
-        File file = new File("player_request.json");
+        File file = Paths.get("player_request.json").toFile();
 
         BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/users/" + username).toURL().openStream());
         FileOutputStream out = new FileOutputStream(file);

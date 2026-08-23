@@ -3,6 +3,7 @@ package streamtool;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -98,7 +99,7 @@ public class CommandManager {
     int reloadCommand() {
         System.out.println("Reloading obs layout");
 
-        run.obsLayout = Main.readJSON(new File("obs_layout.json"));
+        run.obsLayout = Main.readJSON(Paths.get("obs_layout.json").toFile());
 
         JSONArray bH = run.obsLayout.getJSONArray("boardHeight");
         int[] bh2 = new int[bH.length()];
@@ -328,7 +329,7 @@ public class CommandManager {
         } else {
             try {
                 Main.downloadOrder(data.leagueNumber, data.weekNumber);
-                file = new File("seed_order.json");
+                file = Paths.get("seed_order.json").toFile();
             } catch (IOException | URISyntaxException e) {
                 file = null;
             }
