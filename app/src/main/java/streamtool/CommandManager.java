@@ -539,7 +539,6 @@ public class CommandManager {
         switch (value) {
             case "clear":
                 System.out.println("Clearing match data");
-                Leaderboard.clearSeeds();
                 run.clearMatchIds(Main.getSeedcount(data.leagueNumber));
                 return 1;
             case "host":
@@ -611,7 +610,7 @@ public class CommandManager {
         if (!test) {
             // check again if only last id is missing
             boolean test2 = true;
-            for (int i = 1; i < seedcount; i++) test2 = false;
+            for (int i = 1; i < seedcount; i++) if (run.getMatchId(i) == -1) test2 = false;
 
             // run autodl if only missing last id and if seedcount is set to current seed
             if (test2 && seedcount == data.currentSeed) {

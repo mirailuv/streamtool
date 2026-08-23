@@ -100,14 +100,6 @@ public class Leaderboard {
         return result;
     }
 
-    public static void clearSeeds() {
-        for (int i = 1; i <= 8; i++) {
-            File file = Paths.get("lb_data", "seeds", "seed"+i+".json").toFile();
-
-            if (file.exists()) file.delete();
-        }
-    }
-
     public static JSONObject loadLeaderboard(int[] overrides) throws IOException {
         JSONObject leaderboard = Main.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
 

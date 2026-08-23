@@ -96,7 +96,7 @@ public class Main {
 
             if (run.needSave) {
                 System.out.println("Saving data");
-                saveData(data, run, data.currentSeed);
+                saveData(data, run);
                 run.needSave = false;
             }
 
@@ -302,7 +302,7 @@ public class Main {
         return o;
     }
 
-    static void saveData(Data data, RuntimeData run, int currentSeed) throws IOException {
+    static void saveData(Data data, RuntimeData run) throws IOException {
 
         Player[] players = data.players;
         int leagueNumber = data.leagueNumber;
@@ -330,7 +330,7 @@ public class Main {
         object.put("week", weekNumber);
         object.put("players", playerList);
         object.put("seedList", run.seedList);
-        object.put("currentSeed", currentSeed);
+        object.put("currentSeed", data.currentSeed);
         object.put("host", run.hostName);
         object.put("matchIds", idList);
 
