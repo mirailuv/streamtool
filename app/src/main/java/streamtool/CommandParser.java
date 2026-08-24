@@ -418,6 +418,19 @@ public class CommandParser {
 
                 } else result.put("value", 0);
                 break;
+            case "refresh":
+                result.put("command","refresh");
+                result.put("value", 0);
+                if (splitCommand.length > 1) {
+                    String s = splitCommand[1];
+                    IntParser ip = parseInt(s);
+                    if (ip.success) {
+                        if (ip.i <= 4 && ip.i >= 1) {
+                            result.put("value", ip.i);
+                        }
+                    }
+                }
+                break;
             default:
                 result.put("invalid", 1);
         }

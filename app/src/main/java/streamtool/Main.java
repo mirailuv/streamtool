@@ -70,7 +70,7 @@ public class Main {
 
         run.fs = new FileSelect();
 
-        run.client = new Client(new URI("ws://127.0.0.1:4455"), run.enableSocket, run.useStreamlink);
+        run.client = new Client(new URI("ws://127.0.0.1:4455"), run.enableSocket, run.useStreamlink, run.imagePath, run.portRange);
         if (run.client.enable) run.client.connect();
 
         run.scanner = new Scanner(System.in);

@@ -28,6 +28,9 @@ set mute status on stream, works as a toggle with no argument
 )
 runs update function once with no argument. switches to game scene.
 
+> refresh (1|2|3|4)
+refresh a player feed. you can select the specific feed to refresh. defaults to all.
+
 > split
 show splits from spectate_match.json, only shows people who have entered the nether. shows playerId for people who are live.
 

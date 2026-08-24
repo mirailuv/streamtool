@@ -34,10 +34,11 @@ switching from intermission at the start:
 
 useful commands during the seed:
 > split				// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
+> refresh (position)		// refresh a specific pov, or all of them with no argument.
 > update stop			// disable auto-update
 > update auto			// enable auto-update
 > update			// update manually if you turned off auto-update
-> show player position		// put a player on screen manually.
+> show player (position)	// put a player on screen manually.
 > hide player			// hide a player for their current split. they can be shown again once they get to the next split.
 > unhide			// unhides all hidden players.
 > live				// list all registered players who are marked as live.

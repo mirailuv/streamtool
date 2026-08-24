@@ -52,6 +52,7 @@ public class CommandManager {
             case "hide": return hideCommand(commandObject);
             case "unhide": return unhideCommand();
             case "snapshot": return snapshotCommand(commandObject);
+            case "refresh": return refreshCommand(commandObject);
             
         }
 
@@ -524,12 +525,28 @@ public class CommandManager {
         }
         
         if (player.live) {
-            run.client.showPlayer(player, pos, run.imagePath, run.portRange);
+            run.client.showPlayer(player, pos);
             return 1;
         } else {
             System.out.println("Player is not live");
             return 0;
         }        
+    }
+
+    int refreshCommand(JSONObject commandObject) {
+        if (!run.client.enable) return 0;
+
+        int value = commandObject.getInt("value");
+
+        if (value == 0) {
+            int r = 0;
+            for (int i = 1; i <= 4; i++) {
+                r += run.client.refresh(i);
+            }
+            return r;
+        } else {
+            return run.client.refresh(value);
+        }
     }
 
     int matchCommand(JSONObject commandObject) {
@@ -772,7 +789,7 @@ public class CommandManager {
                     if (safety > 4) safety = 4;
 
                     for (int i = 0; i < safety; i++) {
-                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, run.imagePath, run.portRange, false);
+                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, false);
                     }
 
                     run.commandManager.execute(run.commandParser.getCommand("scene update " + safety));
@@ -796,7 +813,7 @@ public class CommandManager {
                     if (safety > 4) safety = 4;
 
                     for (int i = 0; i < safety; i++) {
-                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, run.imagePath, run.portRange, false);
+                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, false);
                     }
 
                     run.commandManager.execute(run.commandParser.getCommand("scene game " + safety));
