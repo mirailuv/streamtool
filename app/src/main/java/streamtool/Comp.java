@@ -23,7 +23,7 @@ public class Comp {
     public static JSONObject updateCompletionsUnsafe(Player[] regPlayers, int seedNumber, RuntimeData run) throws Exception {
         int completionPoints = regPlayers.length / 2;
 
-        
+        if (run.overrides[4] != -1) completionPoints = run.overrides[4] - 5;
 
         File file;
         String compKey = "completes";

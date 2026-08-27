@@ -27,10 +27,13 @@ public class CommandManager {
         switch (command) {
             case "quit": return quitCommand();
             case "restore": return restoreCommand();
+            case "init": return initCommand();
+            case "start": return startCommand();
+            case "setinfo": return setinfoCommand(commandObject);
             case "reload": return reloadCommand();
             case "override": return overrideCommand(commandObject);
             case "mute": return muteCommand(commandObject);
-            case "import": return importCommand();
+            case "import": return importCommand(commandObject);
             case "order": return orderCommand(commandObject);
             case "scene": return sceneCommand(commandObject);
             case "next": return nextCommand();
@@ -62,6 +65,42 @@ public class CommandManager {
 
     int quitCommand() {
         run.stop = true;
+        return 1;
+    }
+
+    int initCommand() {
+        int result = 0;
+
+        // basically just a script to run these 4 commands
+
+        result += run.commandManager.execute(run.commandParser.getCommand("import true"));
+        result += run.commandManager.execute(run.commandParser.getCommand("order api"));
+        result += run.commandManager.execute(run.commandParser.getCommand("match clear"));
+        result += run.commandManager.execute(run.commandParser.getCommand("scene im"));
+
+        return result;
+    }
+
+    int startCommand() {
+        int result = 0;
+
+        // a script to start timer and enable auto-update
+
+        result += run.commandManager.execute(run.commandParser.getCommand("timer game"));
+        result += run.commandManager.execute(run.commandParser.getCommand("update auto"));
+
+        return result;
+    }
+
+    int setinfoCommand(JSONObject commandObject) {
+        data.leagueNumber = commandObject.getInt("lnum");
+        data.weekNumber = commandObject.getInt("wnum");
+
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"League\", \"overlay\": true, \"inputSettings\": {\"text\":\"League " + data.leagueNumber + "\"}}}}");
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Week\", \"overlay\": true, \"inputSettings\": {\"text\":\"Week " + data.weekNumber + "\"}}}}");
+
+        System.out.println("Set to league " + data.leagueNumber + " week " + data.weekNumber);
+
         return 1;
     }
 
@@ -160,7 +199,7 @@ public class CommandManager {
                 System.out.println("Set override: " + var + " = " + value);
                 run.overrides[3] = value;
                 return 1;
-            case "playercount":
+            case "points":
                 System.out.println("Set override: " + var + " = " + value);
                 run.overrides[4] = value;
                 return 1;
@@ -183,40 +222,41 @@ public class CommandManager {
         return 1;
     }
 
-    int importCommand() {
+    int importCommand(JSONObject commandObject) {
         run.needSave = true;
         System.out.println("Select file");
         File file = run.fs.select();
 
         if (file == null) return 0;
 
-        String fileName = file.getName();
-        String lnum = fileName.substring(5, 6);
-        String wnum = fileName.substring(7, 9);
+        if (commandObject.getBoolean("value")) {
+            String fileName = file.getName();
+            String lnum = fileName.substring(5, 6);
+            String wnum = fileName.substring(7, 9);
 
-        int leagueNumber;
-        int weekNumber;
+            int leagueNumber;
+            int weekNumber;
 
-        try {
-            leagueNumber = Integer.parseInt(lnum);
-        } catch (NumberFormatException e) {
-            System.out.println("NumberFormatException with leagueNumber");
-            leagueNumber = 0;
+            try {
+                leagueNumber = Integer.parseInt(lnum);
+            } catch (NumberFormatException e) {
+                System.out.println("NumberFormatException with leagueNumber");
+                leagueNumber = 0;
+            }
+            try {
+                weekNumber = Integer.parseInt(wnum);
+            } catch (NumberFormatException e) {
+                System.out.println("NumberFormatException with weekNumber");
+                weekNumber = 0;
+            }
+
+            JSONObject co = run.commandParser.getCommand("setinfo " + leagueNumber + " " + weekNumber);
+            if (co.getInt("invalid") == 0) {
+                run.commandManager.execute(co);
+            } else {
+                System.out.println("Unable to parse league / week information, update this manually with setinfo");
+            }
         }
-        try {
-            weekNumber = Integer.parseInt(wnum);
-        } catch (NumberFormatException e) {
-            System.out.println("NumberFormatException with weekNumber");
-            weekNumber = 0;
-        }
-
-        data.leagueNumber = leagueNumber;
-        data.weekNumber = weekNumber;
-
-        System.out.println("League " + leagueNumber + " Week " + weekNumber);
-
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"League\", \"overlay\": true, \"inputSettings\": {\"text\":\"League " + leagueNumber + "\"}}}}");
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Week\", \"overlay\": true, \"inputSettings\": {\"text\":\"Week " + weekNumber + "\"}}}}");
 
         if (file.exists()) {
             data.clearPlayers();
@@ -238,7 +278,7 @@ public class CommandManager {
         }
 
         int playerCount = data.players.length;
-        int timeLimit = Main.getTimeLimit(leagueNumber);
+        int timeLimit = Main.getTimeLimit(data.leagueNumber);
 
         run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"numPlayers\", \"overlay\": true, \"inputSettings\": {\"text\":\"Players: " + playerCount + "\"}}}}");
         run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"time text\", \"overlay\": true, \"inputSettings\": {\"text\":\"Time limit: " + timeLimit + " minutes\"}}}}");
@@ -832,8 +872,6 @@ public class CommandManager {
             case "up":
                 int limit = Main.getTimeLimit(data.leagueNumber) * 60;
                 run.timer.start(limit, false, "Timer2", "none");
-                System.out.println("Starting auto-update");
-                run.autoUpdate.start();
                 return 1;
             case "down":
                 int arg2 = commandObject.getInt("var");

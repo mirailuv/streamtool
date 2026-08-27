@@ -4,25 +4,32 @@ close program.
 > restore
 restore previously imported data (players, seeds) after a crash.
 
+> init
+runs import, order api, match clear and scene im.
+
+> setinfo leagueNumber weekNumber
+set the league and week numbers manually, in case init or import true doesn't do it correctly.
+
 > killfeeds
 kill all previous streamlink player feed instances. they may stay running when you crash as it's an external program.
 
-> import
-import player list downloaded from the leagues bot after doing /list.
+> import (true)
+import player list downloaded from the leagues bot after doing /list. updates player count number on intermission. with true argument, updates league and week information as well.
 
 > order {
-	file	// get seed order from a file
-	api	// get seed order from api
-	show	// switch to seed order scene
-	skip	// remove a seed from the order and move it to the end. in case there's a need for a replay.
+	file			// get seed order from a file
+	api			// get seed order from api
+	show			// switch to seed order scene
+	skip (seedNumber)	// remove a seed from the order and move it to the end. in case there's a need for a replay. seed number can be specified, defaults to current seed.
 }
-
+no argument: prints the seed order in terminal, doesn't change anything on obs.
+with file and api arguments also sets current seed to 0. you can change this with setseed.
 
 > mute (true|false)
 set mute status on stream, works as a toggle with no argument
 
 > update (
-	auto	// enable auto-update. this is automatically done when you start the game timer.
+	auto	// enable auto-update. this is done with start command.
 	stop	// disable auto-update. this is done automatically when timer ends or is stopped.
 	random	// put random povs on the screen. does not check if they're playing.
 )
@@ -40,6 +47,9 @@ put a selected player on screen. you can provide a playerId, their ign, or a uni
 > next
 switches to the next seed scene and increments the current seed, so switching from seed 1 to seed 2 for example.
 
+> start
+start the timer for the seed and enable auto-update.
+
 > setseed seedNumber
 set the current seed number manually. seedNumber must be integer between 1 and seed count.
 
@@ -50,7 +60,7 @@ switch scene, im = intermission, ns = next seed, sl = seed list / seed order, sp
 select player to interview and switch to interview scene. you can provide a playerId, their ign, or a unique character sequence in their ign. gives a syntax error if unable to find player.
 
 > timer {
-game			// start the timer for the seed. also starts auto-update.
+game			// start the timer for the seed.
 im seconds		// set and start the intermission timer. seconds must be integer.
 advance|add seconds	// add seconds to the timer.
 stop			// stop the timer.
@@ -63,7 +73,7 @@ show the leaderboard after the current seed. attempts to download match data if 
 show the completions. shows them for current seed from spectate_match.json if no argument is provided. if seedNumber is provided, shows them for the specific seed from match data.
 
 > match {
-	clear			// clear match data. run this at the start.
+	clear			// clear match data.
 	autodl			// try to download the most recent match from the host as current seed.
 	id (count)		// get a number of recent matchIds from the host. prints starting with oldest. count defaults to 1.
 	host username		// set host to username. this is used to download match data.
@@ -95,9 +105,10 @@ unhides all hidden players.
 reload obs configuration file.
 
 > override {
-	promotions|demotions|lb1|lb2|playercount value		// override a specific value for leaderboard gen and display
+	promotions|demotions|lb1|lb2|points value		// override a specific value for leaderboard gen and display
 	reset							// reset overrides
 }
+for promotions & demotions, set the number of them. for points, set 1st place points.
 
 > snapshot (
 	start	// store a snapshot of spectate_match.json every 10 seconds.

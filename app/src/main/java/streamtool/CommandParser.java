@@ -45,11 +45,34 @@ public class CommandParser {
             case "restore":
                 result.put("command", "restore"); // restore previous data
                 break;
+            case "init":
+                result.put("command", "init");
+                break;
+            case "start":
+                result.put("command", "start");
+                break;
+            case "setinfo":
+                result.put("command", "setinfo");
+                if (splitCommand.length > 2) {
+                    IntParser ip1 = parseInt(splitCommand[1]);
+                    IntParser ip2 = parseInt(splitCommand[2]);
+
+                    if (ip1.success && ip2.success && ip1.i > 0 && ip2.i > 0 && ip1.i <= 7) {
+                        result.put("lnum", ip1.i);
+                        result.put("wnum", ip2.i);
+                    } else valid = false;
+
+                } else valid = false;
+                break;
             case "killfeeds":
                 result.put("command", "killfeeds"); // kill player feeds
                 break;
             case "import":
                 result.put("command", "import"); // import players
+                result.put("value", false);
+                if (splitCommand.length > 1) {
+                    if (splitCommand[1].equals("true")) result.put("value", true);
+                }
                 break;
             case "order", "seedorder":
                 result.put("command", "order");
@@ -60,13 +83,14 @@ public class CommandParser {
                     if (splitCommand[1].equals("show")) result.put("value", 4);
                     if (splitCommand[1].equals("skip")) {
                         result.put("value", 2);
+                        result.put("var", data.currentSeed);
                         if (splitCommand.length > 2) {
                             String s = splitCommand[2];
                             IntParser ip = parseInt(s);
                             if (ip.success && ip.i > 0 && ip.i <= Main.getSeedcount(data.leagueNumber)) {
                                 result.put("var", ip.i);
-                            } else valid = false;
-                        } else valid = false;
+                            }
+                        }
                     }
                 }
                 break;
@@ -379,7 +403,7 @@ public class CommandParser {
                     IntParser ip = parseInt(s);
                     if (ip.success) {
                         switch (var) {
-                            case "promotions", "demotions", "lb1", "lb2", "playercount", "reset":
+                            case "promotions", "demotions", "lb1", "lb2", "points", "reset":
                                 result.put("var", var);
                                 result.put("value", ip.i);
                                 break;
@@ -389,6 +413,8 @@ public class CommandParser {
                     } else if (splitCommand.length > 1 && splitCommand[1].equals("reset")) {
                         result.put("var", "reset");
                     } else valid = false;
+                } else if (splitCommand.length > 1 && splitCommand[1].equals("reset")) {
+                    result.put("var", "reset");
                 } else valid = false;
                 break;
             case "snapshot":
