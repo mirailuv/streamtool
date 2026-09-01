@@ -10,15 +10,18 @@ at the start, run this command. it will run import and other commands you want t
 
 if there's an error with setting the league information, you can do it manually with:
 > setinfo leagueNumber weekNumber
+leagueNumber and weekNumber are integers.
 
 when more players reg after you run init, do /list in the discord again and import the new player file with:
 > import
 
 set yourself as the host, in order to get the match data for leaderboard.
 > match host username
+username is just your ign in minecraft.
 
 set the intermission timer
 > timer im seconds
+seconds is an integer, the number of seconds you want your timer to be.
 
 go live on obs.
 
@@ -35,6 +38,9 @@ if the timer is out of sync
 > timer add seconds		// move timer forward by a number of seconds. also accepts negative numbers if you want to go back.
 
 useful commands during the seed:
+// player is someone's ign, their id in the tool, or a unique character sequence in their ign. you can use any of these, if you do it wrong it gives a syntax error.
+// position is a number from 1 to 4. 1 is the big screen, 2 3 4 are the ones on the right side, from top to bottom.
+
 > split				// print the current splits from the spectate match file. only shows people who have entered nether. shows id for players marked as live.
 > refresh (position)		// refresh a specific pov, or all of them with no argument.
 > update stop			// disable auto-update
@@ -50,10 +56,10 @@ useful commands during the seed:
 when the seed is over:
 > comp				// show completions for the seed. disables auto-update if the timer hasn't ended yet.
 > lb				// downloads match data, generates leaderboard and switches to leaderboard scene.
-> override points (number)	// override the points in case they don't match the bot or website. enter the number of points for 1st place. then just run comp/lb again.
+> override points (number)	// override the points in case they don't match the bot or website. enter the number of points for 1st place. then just run comp/lb again. usually this isn't necessary.
 
 when it's time for break:
-> scene co		// switch from leaderboard to commentators. explain the break and how long it's gonna be.
+> scene co		// switch from leaderboard to commentators. explain the break and how long it's gonna be. or you can do this on lb idk.
 > scene im		// switch to intermission.
 > timer im seconds	// set the intermission timer.
 
@@ -65,7 +71,7 @@ after break:
 
 interview and ending stream:
 > scene co		// switch to commentators.
-> interview player	// switch to interview. (optional)
+> interview player	// switch to interview. (if you have one)
 > scene co		// switch back to commentators. say goodbye. end stream on obs.
 
 if there's an incorrect seed and you're just moving to the next seed on the list:
