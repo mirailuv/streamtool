@@ -5,7 +5,8 @@ clone the repository
 build the program with\
 $ gradle build
 
-rename obs_layout.json.example to obs_layout.json, it should work with the setup without additional config.\
+rename obs_layout.json.example to obs_layout.json, you'll need to change the file paths in there later.\
+that's in the main tutorial.\
 if new things have been added to the config you'll need to update the file manually.
 
 make sure obs websocket is enabled with port 4455 and authentication disabled.\
