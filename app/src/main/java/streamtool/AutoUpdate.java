@@ -15,7 +15,10 @@ public class AutoUpdate {
             public void run() {
                 isRunning = true;
                 while(isRunning) {
-                    run.commandManager.execute(run.commandParser.getCommand("update nomsg"));
+
+                    if (!run.spectating) {
+                        run.commandManager.execute(run.commandParser.getCommand("update nomsg"));
+                    }
 
                     try {
                         sleep(1000);

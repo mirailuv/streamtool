@@ -405,6 +405,7 @@ public class CommandManager {
 
     int sceneCommand(JSONObject commandObject) {
         String scene = commandObject.getString("value");
+        run.spectating = false;
         switch(scene) {
             case "intermission":
                 System.out.println("Intermission");
@@ -450,6 +451,7 @@ public class CommandManager {
 
             case "spectator":
                 System.out.println("Spectator");
+                run.spectating = true;
                 run.commandManager.execute(run.commandParser.getCommand("mute false"));
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + run.scenes.get("spectatorScene") + "\"}}}");
                 return 1;

@@ -502,6 +502,8 @@ class RuntimeData {
     boolean enableSocket;
     boolean muted;
 
+    boolean spectating = false;
+
     Client client;
     FileSelect fs;
 
