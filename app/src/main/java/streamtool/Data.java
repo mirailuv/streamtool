@@ -10,6 +10,8 @@ import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import common.Api;
+
 public class Data {
 
     Player[] players;
@@ -156,7 +158,7 @@ public class Data {
             return new String[0];
         }
 
-        JSONObject leaderboard = Main.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+        JSONObject leaderboard = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
 
         JSONArray players = (JSONArray) leaderboard.get("players");
 
@@ -432,7 +434,7 @@ public class Data {
     }
 
     void updateSplits() throws Exception {
-        JSONObject spectate = Main.readJSON(Paths.get("spectate_match.json").toFile());
+        JSONObject spectate = Api.readJSON(Paths.get("spectate_match.json").toFile());
 
         if (spectate == null) throw new Exception();
 

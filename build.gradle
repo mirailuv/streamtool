@@ -1,0 +1,122 @@
+plugins {
+    id 'application'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'application'
+}
+
+project(':common') {
+    repositories {
+        mavenCentral()
+    }
+    
+
+    sourceSets {
+        main {
+            java {
+                srcDir '../src'
+                include 'common/**'
+            }
+        }
+    }
+
+    dependencies {
+        implementation 'org.json:json:20260814'
+        implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+    }
+
+    application {
+        mainClass = 'common.Main'
+    }
+
+    jar {
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        manifest {
+            attributes "Main-Class": "common.Main"
+        }
+
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+}
+
+project(':app') {
+    repositories {
+        mavenCentral()
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDir '../src'
+                include 'streamtool/**'
+            }
+        }
+    }
+
+    dependencies {
+        implementation 'org.json:json:20260814'
+        implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+        implementation project(':common')
+    }
+
+    application {
+        mainClass = 'streamtool.Main'
+    }
+
+    jar {
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        manifest {
+            attributes "Main-Class": "streamtool.Main"
+        }
+
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+}
+
+project(':testnew') {
+    repositories {
+        mavenCentral()
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDir '../src'
+                include 'testnew/**'
+            }
+        }
+    }
+
+
+    dependencies {
+        implementation project(':app')
+        implementation project(':common')
+    }
+
+    application {
+        mainClass = 'testnew.Main'
+    }
+
+    jar {
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        manifest {
+            attributes "Main-Class": "testnew.Main"
+        }
+
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+}

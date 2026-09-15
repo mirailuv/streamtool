@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 
 import org.json.JSONObject;
 
+import common.Api;
+
 public class Snapshot {
 
     Thread snapshot;
@@ -24,7 +26,7 @@ public class Snapshot {
                 while(true) {
                     if (!isRunning) break;
 
-                    JSONObject data = Main.readJSON(Paths.get("spectate_match.json").toFile());
+                    JSONObject data = Api.readJSON(Paths.get("spectate_match.json").toFile());
 
                     if (data != null) {
                         Long time = System.currentTimeMillis() / 1000;
@@ -67,7 +69,7 @@ public class Snapshot {
                     File file = Paths.get("snapshots", "spectate-"+loadTracker+".json").toFile();
 
                     JSONObject data = null;
-                    if (file.exists()) data = Main.readJSON(file);
+                    if (file.exists()) data = Api.readJSON(file);
 
                     File spectate = Paths.get("spectate_match.json").toFile();
 

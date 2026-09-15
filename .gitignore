@@ -4,6 +4,10 @@
 app/build
 app/bin
 app/libs
+testnew/bin
+testnew/build
+common/bin
+common/build
 build
 lb_data
 out_heads
@@ -14,5 +18,8 @@ interview.png
 runtime_data.json
 seed_order.json
 spectate_match.json
+download.json
 websocket_log.txt
 obs_layout.json
+heads
+skins

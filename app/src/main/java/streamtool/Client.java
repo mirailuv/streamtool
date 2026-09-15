@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-class Client extends WebSocketClient {
+public class Client extends WebSocketClient {
 
     boolean enable = true;
     Player[] povs = new Player[4];
@@ -130,6 +130,7 @@ class Client extends WebSocketClient {
 
     public Client(URI uri) {
         super(uri);
+        log = new Log(Paths.get("websocket_log.txt").toFile(), true);
     }
 
     @Override

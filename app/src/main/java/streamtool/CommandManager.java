@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import common.Api;
+
 public class CommandManager {
 
     Data data;
@@ -139,7 +141,7 @@ public class CommandManager {
     int reloadCommand() {
         System.out.println("Reloading obs layout");
 
-        run.obsLayout = Main.readJSON(Paths.get("obs_layout.json").toFile());
+        run.obsLayout = Api.readJSON(Paths.get("obs_layout.json").toFile());
 
         JSONArray bH = run.obsLayout.getJSONArray("boardHeight");
         int[] bh2 = new int[bH.length()];
@@ -260,7 +262,7 @@ public class CommandManager {
 
         if (file.exists()) {
             data.clearPlayers();
-            JSONArray array = Main.readJSONArray(file);
+            JSONArray array = Api.readJSONArray(file);
             for (int i = 0; i < array.length(); i++) {
                 JSONObject o = array.getJSONObject(i);
                 String name = o.getString("ign");
@@ -381,7 +383,7 @@ public class CommandManager {
             return 0;
         }
 
-        run.seedList = Main.readJSON(file);
+        run.seedList = Api.readJSON(file);
         JSONArray seed_data = (JSONArray) run.seedList.get("data");
 
         System.out.println("Seed order:");

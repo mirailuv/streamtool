@@ -18,11 +18,13 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import common.Api;
+
 public class Leaderboard {
 
     public static boolean downloadSeed(int seedNumber, int matchId, RuntimeData run) {
         try {
-            downloadSeedUnsafe(matchId);
+            Api.downloadSeedUnsafe(matchId);
             boolean setId = run.setMatchId(seedNumber, matchId);
             if (!setId) {
                 System.out.println("Failed to save match id");
@@ -34,45 +36,6 @@ public class Leaderboard {
         }
 
         return true;
-    }
-
-    static void downloadSeedUnsafe(int matchId) throws MalformedURLException, IOException, URISyntaxException {
-        File matchFile = Paths.get("lb_data", "matches", matchId+".json").toFile();
-
-        BufferedInputStream in = new BufferedInputStream(new URI("https://api.mcsrranked.com/matches/" + matchId).toURL().openStream());
-        FileOutputStream out = new FileOutputStream(matchFile);
-        byte dataBuffer[] = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-            out.write(dataBuffer, 0, bytesRead);
-        }
-        out.close();
-
-        JSONObject matchData = Main.readJSON(matchFile);
-        JSONObject data = matchData.getJSONObject("data");
-        JSONArray completions = data.getJSONArray("completions");
-        JSONArray players = data.getJSONArray("players");
-
-        System.out.println("Completions:");
-
-        for (int i = 0; i < completions.length(); i++) {
-            JSONObject completion = completions.getJSONObject(i);
-            String uuid = completion.getString("uuid");
-            int time = completion.getInt("time");
-            String name = "";
-
-            for (int b = 0; b < players.length(); b++) {
-                JSONObject player = players.getJSONObject(b);
-                String playerUuid = player.getString("uuid");
-                if (uuid.equals(playerUuid)) {
-                    name = player.getString("nickname");
-                    break;
-                }
-            }
-
-            System.out.println(name + " " + time);
-        }
-
     }
 
     public static int[] getMatchIds(String host, int count) throws MalformedURLException, IOException, URISyntaxException {
@@ -88,7 +51,7 @@ public class Leaderboard {
         }
         out.close();
 
-        JSONObject idRequest = Main.readJSON(file);
+        JSONObject idRequest = Api.readJSON(file);
 
         String status = (String) idRequest.get("status");
         if (!status.equals("success")) return null;
@@ -101,7 +64,7 @@ public class Leaderboard {
     }
 
     public static JSONObject loadLeaderboard(int[] overrides) throws IOException {
-        JSONObject leaderboard = Main.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+        JSONObject leaderboard = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
 
         JSONArray players = (JSONArray) leaderboard.get("players");
 
@@ -185,7 +148,7 @@ public class Leaderboard {
             String compKey = "completions";
             String uuidKey = "uuid";
 
-            JSONObject o = Main.readJSON(file);
+            JSONObject o = Api.readJSON(file);
             o = (JSONObject) o.get("data");
             JSONArray comp = (JSONArray) o.get(compKey);
             JSONArray players = (JSONArray) o.get("players");

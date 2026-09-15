@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import common.Api;
+
 public class Comp {
     public static JSONObject updateCompletions(Player[] regPlayers, int seedNumber, RuntimeData run) {
         JSONObject result = null;
@@ -50,7 +52,7 @@ public class Comp {
 
         if (!file.exists()) return null;
 
-        JSONObject o = Main.readJSON(file);
+        JSONObject o = Api.readJSON(file);
         if (needData) o = (JSONObject) o.get("data");
         JSONArray comp = (JSONArray) o.get(compKey);
         JSONArray players = (JSONArray) o.get("players");

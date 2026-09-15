@@ -1,11 +1,9 @@
 package streamtool;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -18,6 +16,9 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import common.Api;
+import common.FileSelect;
 
 public class Main {
 
@@ -33,7 +34,7 @@ public class Main {
         int[] overrides = {-1, -1, -1, -1, -1};
         run.overrides = overrides;
 
-        run.obsLayout = readJSON(Paths.get("obs_layout.json").toFile());
+        run.obsLayout = Api.readJSON(Paths.get("obs_layout.json").toFile());
 
         run.portRange = run.obsLayout.getInt("portRange"); // ports for streamlink feeds, they are this value + playerId
         run.useStreamlink = run.obsLayout.getBoolean("useStreamlink");
@@ -71,11 +72,9 @@ public class Main {
         run.fs = new FileSelect();
 
         run.client = new Client(new URI("ws://127.0.0.1:4455"), run.enableSocket, run.useStreamlink, run.imagePath, run.portRange);
-        if (run.client.enable) run.client.connect();
+        if (run.client.enable) run.client.connectBlocking();
 
         run.scanner = new Scanner(System.in);
-
-        Thread.sleep(1000);
 
         if (run.client.enable) run.client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
 
@@ -146,7 +145,7 @@ public class Main {
         }
         out.close();
 
-        JSONArray apiData = readJSONArray(file);
+        JSONArray apiData = Api.readJSONArray(file);
         JSONArray data = new JSONArray();
 
         for (int i = 0; i < apiData.length(); i++) {
@@ -221,87 +220,6 @@ public class Main {
         return result;
     }
 
-    public static JSONObject readJSON(File file) {
-        JSONObject result = null;
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                result = readJSONunsafe(file);
-            } catch (JSONException e) {
-                result = null;
-            } catch (IOException e) {
-                result = null;
-            }
-
-            if (result != null) return result;
-        }
-
-        return null;
-    }
-
-    public static JSONArray readJSONArray(File file) {
-        JSONArray result = null;
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                result = readJSONArrayunsafe(file);
-            } catch (JSONException e) {
-                result = null;
-            } catch (IOException e) {
-                result = null;
-            }
-
-            if (result != null) return result;
-        }
-
-        return null;
-    }
-
-    public static JSONObject readJSONunsafe(File file) throws IOException, JSONException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
-        String ls = System.getProperty("line.separator");
-        while ((line = reader.readLine()) != null) {
-	        stringBuilder.append(line);
-	        stringBuilder.append(ls);
-        }
-
-        if (stringBuilder.length() == 0) {
-            reader.close();
-            return null;
-        }
-
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        reader.close();
-
-        String content = stringBuilder.toString();
-
-        JSONObject o = new JSONObject(content);
-
-        return o;
-    }
-
-    public static JSONArray readJSONArrayunsafe(File file) throws IOException, JSONException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
-        String ls = System.getProperty("line.separator");
-        while ((line = reader.readLine()) != null) {
-	        stringBuilder.append(line);
-	        stringBuilder.append(ls);
-        }
-
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        reader.close();
-
-        String content = stringBuilder.toString();
-
-        JSONArray o = new JSONArray(content);
-
-        return o;
-    }
-
     static void saveData(Data data, RuntimeData run) throws IOException {
 
         Player[] players = data.players;
@@ -341,7 +259,7 @@ public class Main {
 
     static JSONObject getData() {
         File file = Paths.get("runtime_data.json").toFile();
-        JSONObject object = readJSON(file);
+        JSONObject object = Api.readJSON(file);
         return object;
     }
 
@@ -373,7 +291,7 @@ public class Main {
         }
         out.close();
 
-        JSONObject user = readJSON(file);
+        JSONObject user = Api.readJSON(file);
         if (user == null) return null;
         String status = user.getString("status");
         if (status != null && status.equals("success")) {
