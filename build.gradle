@@ -83,7 +83,7 @@ project(':app') {
     }
 }
 
-project(':testnew') {
+project(':scoreboard') {
     repositories {
         mavenCentral()
     }
@@ -92,19 +92,18 @@ project(':testnew') {
         main {
             java {
                 srcDir '../src'
-                include 'testnew/**'
+                include 'scoreboard/**'
             }
         }
     }
 
 
     dependencies {
-        implementation project(':app')
         implementation project(':common')
     }
 
     application {
-        mainClass = 'testnew.Main'
+        mainClass = 'scoreboard.Main'
     }
 
     jar {
@@ -112,7 +111,7 @@ project(':testnew') {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         manifest {
-            attributes "Main-Class": "testnew.Main"
+            attributes "Main-Class": "scoreboard.Main"
         }
 
         from {

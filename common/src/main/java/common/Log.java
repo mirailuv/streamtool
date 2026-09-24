@@ -1,4 +1,4 @@
-package streamtool;
+package common;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,7 +17,7 @@ public class Log {
         lines = new ArrayList<>();
     }
 
-    void write(String line) {
+    public void write(String line) {
         lines.add(System.currentTimeMillis() + " " + line);
         try {
             updateFile();

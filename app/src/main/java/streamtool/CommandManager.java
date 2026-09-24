@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import common.Api;
+import common.ImageGen;
 
 public class CommandManager {
 
@@ -28,6 +30,7 @@ public class CommandManager {
         String command = commandObject.getString("command");
         switch (command) {
             case "quit": return quitCommand();
+            case "test": return testCommand();
             case "restore": return restoreCommand();
             case "init": return initCommand();
             case "start": return startCommand();
@@ -70,6 +73,15 @@ public class CommandManager {
         return 1;
     }
 
+    int testCommand() {
+        // TODO use this for testing stuff, remove anything later
+
+        JSONObject lb = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+        ImageGen.leaderboard(lb, 1, 5);
+
+        return 1;
+    }
+
     int initCommand() {
         int result = 0;
 
@@ -100,6 +112,12 @@ public class CommandManager {
 
         run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"League\", \"overlay\": true, \"inputSettings\": {\"text\":\"League " + data.leagueNumber + "\"}}}}");
         run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Week\", \"overlay\": true, \"inputSettings\": {\"text\":\"Week " + data.weekNumber + "\"}}}}");
+
+        int playerCount = data.players.length;
+        int timeLimit = Main.getTimeLimit(data.leagueNumber);
+
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"numPlayers\", \"overlay\": true, \"inputSettings\": {\"text\":\"Players: " + playerCount + "\"}}}}");
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"time text\", \"overlay\": true, \"inputSettings\": {\"text\":\"Time limit: " + timeLimit + " minutes\"}}}}");
 
         System.out.println("Set to league " + data.leagueNumber + " week " + data.weekNumber);
 
@@ -143,21 +161,6 @@ public class CommandManager {
 
         run.obsLayout = Api.readJSON(Paths.get("obs_layout.json").toFile());
 
-        JSONArray bH = run.obsLayout.getJSONArray("boardHeight");
-        int[] bh2 = new int[bH.length()];
-        for (int i = 0; i < bh2.length; i++) bh2[i] = bH.getInt(i);
-        run.boardHeight = bh2;
-
-        JSONArray pzH = run.obsLayout.getJSONArray("promoteHeight");
-        int[] pzh2 = new int[pzH.length()];
-        for (int i = 0; i < pzh2.length; i++) pzh2[i] = pzH.getInt(i);
-        run.promoteZoneHeight = pzh2;
-
-        JSONArray dZ = run.obsLayout.getJSONArray("demoteZonePos");
-        int[] dz2 = new int[dZ.length()];
-        for (int i = 0; i < dz2.length; i++) dz2[i] = dZ.getInt(i);
-        run.demoteZonePos = dz2;
-
         run.scenes = (JSONObject) run.obsLayout.get("scenes");
         run.audio = (JSONObject) run.obsLayout.get("audio");
         run.paths = (JSONObject) run.obsLayout.get("paths");
@@ -165,6 +168,8 @@ public class CommandManager {
         run.imagePath = (String) run.paths.get("heads");
         run.seediconPath = (String) run.paths.get("seed_icons");
         run.seedimagePath = (String) run.paths.get("seed_images");
+
+        Main.abDelay = run.obsLayout.optLong("switchDelay", 0L);
     
         return 1;
     }
@@ -279,12 +284,6 @@ public class CommandManager {
             return 0;
         }
 
-        int playerCount = data.players.length;
-        int timeLimit = Main.getTimeLimit(data.leagueNumber);
-
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"numPlayers\", \"overlay\": true, \"inputSettings\": {\"text\":\"Players: " + playerCount + "\"}}}}");
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"time text\", \"overlay\": true, \"inputSettings\": {\"text\":\"Time limit: " + timeLimit + " minutes\"}}}}");
-
         return 1;
     }
 
@@ -304,14 +303,13 @@ public class CommandManager {
 
             System.out.println("Seed order:");
 
-            // update the seed order
+            // print seed order
             for (int i = 0; i < array.length(); i++) {
                 int seed_number = i + 1;
                 JSONObject this_seed = (JSONObject) array.get(i);
                 String seed_type = (String) this_seed.get("type");
-                String seedTypeText = seed_type.replace("_", " ");
 
-                System.out.println("Seed " + seed_number + " = " + seedTypeText);
+                System.out.println("Seed " + seed_number + " = " + seed_type);
             }
 
 
@@ -320,6 +318,7 @@ public class CommandManager {
 
         // switch to scene
         if (value == 4) {
+            orderGenImage();
             run.commandManager.execute(run.commandParser.getCommand("scene order"));
             return 1;
         }
@@ -347,18 +346,16 @@ public class CommandManager {
             System.out.println("Skipping seed " + var + " to be played at the end");
             System.out.println("New seed order:");
 
-            // update the seed order
+            // print the seed order
             for (int i = 0; i < array.length(); i++) {
-                int seed_number = i + 1;
                 JSONObject this_seed = (JSONObject) array.get(i);
                 String seed_type = (String) this_seed.get("type");
-                String seedTypeText = seed_type.replace("_", " ");
 
-                System.out.println("Seed " + seed_number + " = " + seedTypeText);
-
-                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"text " + seed_number + "\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + seedTypeText + "\"}}}}");
-                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"icon " + seed_number + "\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.seediconPath + seed_type + ".png" + "\"}}}}");
+                System.out.println("Seed " + (i + 1) + " = " + seed_type);
             }
+
+            // generate seed order image
+            orderGenImage();
 
             run.seedList.put("data", array);
             return 1;
@@ -388,21 +385,32 @@ public class CommandManager {
 
         System.out.println("Seed order:");
 
+        // print seed order
         for (int i = 0; i < seed_data.length(); i++) {
-            int seed_number = i + 1;
             JSONObject this_seed = (JSONObject) seed_data.get(i);
             String seed_type = (String) this_seed.get("type");
-            String seedTypeText = seed_type.replace("_", " ");
 
-            System.out.println("Seed " + seed_number + " = " + seedTypeText);
-
-            run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"text " + seed_number + "\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + seedTypeText + "\"}}}}");
-            run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"icon " + seed_number + "\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.seediconPath + seed_type + ".png" + "\"}}}}");
+            System.out.println("Seed " + (i + 1) + " = " + seed_type);
         }
 
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Seed\", \"overlay\": true, \"inputSettings\": {\"text\":\"Seed " + data.currentSeed + "\"}}}}");
+        // generate seed order image
+        orderGenImage();
 
         return 1;
+    }
+
+    private void orderGenImage() {
+        JSONArray seed_data = run.seedList.getJSONArray("data");
+        ArrayList<String> gen = new ArrayList<>();
+        for (int i = 0; i < seed_data.length(); i++) {
+            JSONObject this_seed = (JSONObject) seed_data.get(i);
+            String seed_type = (String) this_seed.get("type");
+            gen.add(seed_type);
+        }
+        ImageGen.seedOrder(gen, data.currentSeed);
+
+        // TODO copy this line to other parts
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"seedorder\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "seedorder.png" + "\"}}}}");
     }
 
     int sceneCommand(JSONObject commandObject) {
@@ -418,7 +426,6 @@ public class CommandManager {
             case "nextseed":
                 System.out.println("Next seed");
                 run.commandManager.execute(run.commandParser.getCommand("mute false"));
-                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Seed\", \"overlay\": true, \"inputSettings\": {\"text\":\"Seed " + data.currentSeed + "\"}}}}");
 
                 // load seed information
                 int seed_number = data.currentSeed;
@@ -428,11 +435,13 @@ public class CommandManager {
                 JSONArray seed_data = (JSONArray) run.seedList.get("data");
                 JSONObject this_seed = (JSONObject) seed_data.get(seed_number - 1);
                 String seed_type = (String) this_seed.get("type");
-                String seedTypeText = seed_type.replace("_", " ");
+                String seedTypePreFormat = seed_type.replace("_", " ");
+                if (seedTypePreFormat.length() < 2) seedTypePreFormat = "error";
+                String seedTypeText = seedTypePreFormat.substring(0, 1).toUpperCase() + seedTypePreFormat.substring(1);
                         
                 // set seed information
-                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"seed number\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + seed_number + "\"}}}}");
-                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Seed\", \"overlay\": true, \"inputSettings\": {\"text\":\"Seed " + data.currentSeed + "\"}}}}");
+                run.commandManager.execute(run.commandParser.getCommand("setseed " + data.currentSeed));
+
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"seedtype text\", \"overlay\": true, \"inputSettings\": {\"text\":\"" + seedTypeText + "\"}}}}");
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"seedtype icon\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.seediconPath + seed_type + ".png" + "\"}}}}");
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"seed_background\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.seedimagePath + seed_type + ".png" + "\"}}}}");
@@ -444,10 +453,7 @@ public class CommandManager {
             case "order":
                 System.out.println("Seed list");
                 run.commandManager.execute(run.commandParser.getCommand("mute false"));
-
-                int seed_count = (int) run.seedList.get("seedcount");
-                JSONObject seedlistScenes = (JSONObject) run.scenes.get("seedlistScenes");
-                String seedlistScene = (String) seedlistScenes.get("seeds" + seed_count);
+                String seedlistScene = (String) run.scenes.get("seedlistScene");
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + seedlistScene + "\"}}}");
                 return 1;
 
@@ -510,11 +516,8 @@ public class CommandManager {
             return 0;
         }
 
-        // update the seed number
-        run.commandManager.execute(run.commandParser.getCommand("setseed " + data.currentSeed));
-
-        // switch to next seed scene
-        run.commandManager.execute(run.commandParser.getCommand("scene nextseed"));
+        // switch to seed order scene
+        run.commandManager.execute(run.commandParser.getCommand("order show"));
 
         return 1;
 
@@ -524,7 +527,7 @@ public class CommandManager {
         run.needSave = true;
         data.currentSeed = commandObject.getInt("value");
         System.out.println("Set seed to " + data.currentSeed);
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Seed\", \"overlay\": true, \"inputSettings\": {\"text\":\"Seed " + data.currentSeed + "\"}}}}");
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"Seed\", \"overlay\": true, \"inputSettings\": {\"text\":\"Seed " + data.currentSeed + "/" + Main.getSeedcount(data.leagueNumber) +"\"}}}}");
         return 1;
     }
 
@@ -556,8 +559,6 @@ public class CommandManager {
 
     int showCommand(JSONObject commandObject) {
 
-        if (!run.client.enable) return 0;
-
         int id = commandObject.getInt("id");
         int pos = commandObject.getInt("pos");
 
@@ -578,8 +579,6 @@ public class CommandManager {
     }
 
     int refreshCommand(JSONObject commandObject) {
-        if (!run.client.enable) return 0;
-
         int value = commandObject.getInt("value");
 
         if (value == 0) {
@@ -625,11 +624,6 @@ public class CommandManager {
                 boolean result = Leaderboard.downloadSeed(seedNumber, matchId, run);
                 if (result) return 1; else return 0;
             case "dl":
-                if (run.hostName.equals("")) {
-                    System.out.println("Host not set");
-                    return 0;
-                }
-
                 int seedNumber2 = commandObject.getInt("seed");
                 int matchId2 = commandObject.getInt("match");
                 System.out.println("Downloading seed " + seedNumber2 + " from id " + matchId2);
@@ -692,59 +686,14 @@ public class CommandManager {
             return 0;
         }
 
-        // update leaderboard txt files
-        JSONObject lbData;
-        try {
-            lbData = Leaderboard.loadLeaderboard(run.overrides);
-        } catch (IOException e) {
-            System.out.println("Failed to load leaderboard data");
-            return 0;
-        }
+        // generate a new lb image
+        JSONObject lb = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
+        ImageGen.leaderboard(lb, data.currentSeed, Main.getSeedcount(data.leagueNumber));
+        ImageGen.averages(lb);
 
-        // import return data
-        int promCount = lbData.getInt("promotions");
-        int demCount = lbData.getInt("demotions");
-        int page1 = lbData.getInt("page1");
-        int page2 = lbData.getInt("page2");
-
-        // enter overrides
-        if (run.overrides[0] != -1) promCount = run.overrides[0];
-        if (run.overrides[1] != -1) demCount = run.overrides[1];
-
-        // get leaderboard height data
-
-        int page1height = 2000; int page2height = 2000;
-
-        if (page1 > 0) page1height = run.boardHeight[page1 - 1];
-        if (page2 > 0) page2height = run.boardHeight[page2 - 1];
-
-        int promHeight = 2000;
-        if (promCount > 0) promHeight = run.promoteZoneHeight[promCount - 1];
-
-        int demPos = 750;
-        int demMath = page2 - demCount + 1;
-        if (demMath > 0 & demMath <= 13) demPos = run.demoteZonePos[demMath - 1];
-
-        //System.out.println(promCount + " " + promHeight);
-        //System.out.println(demCount + " " + demHeight + " " + demPos);
-
-        JSONObject lbIds = run.scenes.getJSONObject("lbIds");
-
-        // leaderboard transformation
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"" + run.scenes.get("leaderboardScene") +"\", \"sceneUuid\": \"\", \"sceneItemId\": " + lbIds.get("lb1") + ", \"sceneItemTransform\": {\"cropBottom\": " + page1height +"}}}}");
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"" + run.scenes.get("leaderboardScene") +"\", \"sceneUuid\": \"\", \"sceneItemId\": " + lbIds.get("lb2") + ", \"sceneItemTransform\": {\"cropBottom\": " + page2height +"}}}}");
-
-        // promotion transformation
-        int promId = lbIds.getInt("prom");
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"lb1\", \"sceneUuid\": \"\", \"sceneItemId\": " + promId + ", \"sceneItemTransform\": {\"cropBottom\": " + promHeight + "}}}}");
-
-        // demotion transformation
-        int demId = lbIds.getInt("dem");
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"lb2\", \"sceneUuid\": \"\", \"sceneItemId\": " + demId + ", \"sceneItemTransform\": {\"positionY\": " + demPos + "}}}}");
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {}
+        // refresh the images
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"leaderboard\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "leaderboard.png" + "\"}}}}");
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"multiweek\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "multiweek.png" + "\"}}}}");
 
         // switch to lb scene
         run.commandManager.execute(run.commandParser.getCommand("scene leaderboard"));
@@ -764,37 +713,18 @@ public class CommandManager {
         run.autoUpdate.stop();
 
         int value = commandObject.getInt("value");
-        JSONObject layoutData = Comp.updateCompletions(data.players, value, run);
+        JSONObject comp = Comp.getCompletions(data.players, value, run, data);
 
-        if (layoutData == null) {
+        if (comp == null) {
             System.out.println("Failed to update completions");
             return 0;
         }
 
-        int page1 = (int) layoutData.get("page1");
-        int page2 = (int) layoutData.get("page2");
-        boolean showPage2 = true;
-        if (page2 == 0) showPage2 = false;
+        ImageGen.completions(comp);
 
-        int page1height = 2000; int page2height = 2000;
+        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"completions\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "completions.png" + "\"}}}}");
 
-        if (page1 > 0) page1height = run.boardHeight[page1 - 1];
-        if (page2 > 0) page2height = run.boardHeight[page2 - 1];
-
-        JSONObject compIds = run.scenes.getJSONObject("compIds");
-
-        // set page heights
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"" + run.scenes.get("completionScene") +"\", \"sceneUuid\": \"\", \"sceneItemId\": " + compIds.get("comp1") + ", \"sceneItemTransform\": {\"cropBottom\": " + page1height +"}}}}");
-        run.client.send("{\"op\":6, \"d\":{\"requestType\": \"SetSceneItemTransform\", \"requestId\": \"0\", \"requestData\": {\"canvasUuid\": \"\", \"sceneName\": \"" + run.scenes.get("completionScene") +"\", \"sceneUuid\": \"\", \"sceneItemId\": " + compIds.get("comp2") + ", \"sceneItemTransform\": {\"cropBottom\": " + page2height +"}}}}");
-
-        // wait 1 second for text sources to update
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {}
-
-        // set page 2 visibility and switch to completion scene
-
-        run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetSceneItemEnabled\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + run.scenes.get("completionScene") + "\", \"sceneItemId\": " + (run.scenes.getJSONObject("compIds")).get("comp2") + ", \"sceneItemEnabled\": " + showPage2 + "}}}");
+        // switch to comp scene
         run.commandManager.execute(run.commandParser.getCommand("scene completions"));
 
         return 1;
@@ -879,7 +809,7 @@ public class CommandManager {
                 return 1;
             case "down":
                 int arg2 = commandObject.getInt("var");
-                run.timer.start(arg2, true, "Timer", "Starting soon");
+                run.timer.start(arg2, true, "Timer", "none");
                 return 1;
             case "advance":
                 int arg3 = commandObject.getInt("var");

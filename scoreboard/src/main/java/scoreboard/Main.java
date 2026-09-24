@@ -1,4 +1,4 @@
-package common;
+package scoreboard;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -14,6 +14,10 @@ import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import common.Api;
+import common.FileSelect;
+import common.Render;
 
 public class Main {
 
@@ -32,12 +36,13 @@ public class Main {
     }
 
     public static Color mainColor = new Color(255, 255, 255, 63);
-
     public static Color winColor = new Color(127, 255, 127, 63);
     public static Color demoteColor = new Color(255, 127, 127, 63);
-
     public static Color pointColor = new Color(127, 255, 127, 255);
     public static Color avgColor = new Color(191, 191, 191, 255);
+
+
+    // STANDALONE WAY OF RENDERING ANIMATIONS AND STUFF
     public static void main(String[] args) throws InterruptedException {
 
         if (args.length == 0) {
@@ -95,17 +100,9 @@ public class Main {
 
         JSONObject config = Api.readJSON(Paths.get(folder, "config.json").toFile());
 
-        Render r = new Render();
+        Render r = new Render(60);
 
-        int pl = playerList.length();
-
-        int columns = getColumns(pl);
-        int rows = getRows(pl, columns);
-
-        int scale = columns;
-        if (scale == 1) scale = 2;
-
-        Grid leaderboard = new Grid(columns, rows, scale);
+        Grid leaderboard = new Grid(playerList.length());
 
         leaderboard.promCount = config.optInt("prom", 1);
         leaderboard.demCount = config.optInt("dem", 0);
@@ -138,8 +135,8 @@ public class Main {
         int prevCount = 0;
 
         r.pause();
-
         r.qWait(60);
+        new Thread(r).start();
 
         while (true) {
             System.out.println("Seed " + seed);
@@ -147,14 +144,7 @@ public class Main {
             JSONObject comp = Api.readJSON(Paths.get(folder, "seed" + seed + ".json").toFile());
             JSONArray completions = comp.getJSONArray("completions");
 
-            int completed = completions.length();
-
-            int col = getColumns(completed);
-            int row = getRows(completed, col);
-            int sca = col;
-            if (sca == 1) sca = 2;
-
-            Grid completionGrid = new Grid(col, row, sca);
+            Grid completionGrid = new Grid(completions.length());
 
             completionGrid.demCount = 0;
             completionGrid.promCount = 0;
@@ -176,7 +166,7 @@ public class Main {
 
             int wuh = leaderboard.width;
 
-            if (col > 1) wuh = completionGrid.width;
+            if (getColumns(completions.length()) > 1) wuh = completionGrid.width;
 
             Title compTitle = new Title(wuh, 100, "Completions        ", seed + "/" + seedCount, mainColor, 80, 15);
 
@@ -186,12 +176,12 @@ public class Main {
             ArrayList<BufferedImage> compFadeOut = new ArrayList<>();
 
             for (int i = 0; i <= 30; i++) {
-                compFadeIn.add(getFrame(completionGrid.img, i, 30, compTitle));
-                compFadeOut.add(getFrame(completionGrid.img, 30 - i, 30, compTitle));
+                compFadeIn.add(getFrame(completionGrid.img, (i + 0f) / 30, compTitle));
+                compFadeOut.add(getFrame(completionGrid.img, (30f - i) / 30, compTitle));
             }
 
             r.qRender(compFadeIn);
-            r.qWait(300);
+            r.qWait(240);
 
             r.render();
 
@@ -216,7 +206,7 @@ public class Main {
             ArrayList<BufferedImage> fadeIn = new ArrayList<>();
 
             for (int i = 0; i <= 30; i++) {
-                fadeIn.add(getFrame(leaderboard.img, i, 30, lbTitle));
+                fadeIn.add(getFrame(leaderboard.img, (i + 0f) / 30, lbTitle));
             }
 
             r.qRender(fadeIn);
@@ -234,59 +224,98 @@ public class Main {
             } else {
                 r.qWait(32);
             }
-
+            Long t = System.currentTimeMillis();
+            System.out.println("Prep point animation");
             leaderboard.prepPointAnimations();
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
             int frameCount = 91 + delayTime;
 
             ArrayList<BufferedImage> pointsAnimation = new ArrayList<>();
 
+            t = System.currentTimeMillis();
+            System.out.println("Start point animation");
             for (int frame = 0; frame <= frameCount; frame++) {
                 leaderboard.drawPointAnimations(frame);
                 pointsAnimation.addLast(getFrame(leaderboard.img, lbTitle));
             }
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
+            t = System.currentTimeMillis();
+            System.out.println("Prep avg fade");
+            leaderboard.prepAvgFade();
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
+
+            t = System.currentTimeMillis();
+            System.out.println("Start avg fade");
             for (int frame = 0; frame <= 61; frame++) {
                 leaderboard.avgFade(frame);
                 pointsAnimation.addLast(getFrame(leaderboard.img, lbTitle));
             }
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
             r.qRender(pointsAnimation);
             r.qWait(30);
 
-            if (seed == 1) new Thread(r).start();
-
+            t = System.currentTimeMillis();
+            System.out.println("Prep move animation");
+            leaderboard.updateBlockElements();
             leaderboard.update();
+            leaderboard.prepMoveAnimation();
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
             ArrayList<BufferedImage> moveAnimation = new ArrayList<>();
 
-            for (int frame = 0; frame <= 61; frame++) {
-                leaderboard.drawBlocks();
+            t = System.currentTimeMillis();
+            System.out.println("Start move animation");
+
+            int moveLength = 60;
+
+            for (int frame = 0; frame <= moveLength + 1; frame++) {
+                //leaderboard.drawBlocks();
+                leaderboard.drawMoveAnimation(frame, moveLength);
                 moveAnimation.addLast(getFrame(leaderboard.img, lbTitle));
             }
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
             r.qRender(moveAnimation);
 
             leaderboard.finishUpdate();
 
+            t = System.currentTimeMillis();
+            System.out.println("Color fade");
+            leaderboard.prepColors();
+
             ArrayList<BufferedImage> colorAnimation = new ArrayList<>();
             
-            for (int frame = 0; frame <= 31; frame++) {
+            for (int frame = 0; frame < 30; frame++) {
                 for (int i = 0; i < leaderboard.players.size(); i++) {
                     leaderboard.players.get(i).fadeUpdate();
                 }
-                leaderboard.drawBlocks();
+                //leaderboard.drawBlocks();
+                leaderboard.drawColors();
                 colorAnimation.addLast(getFrame(leaderboard.img, lbTitle));
             }
+            //leaderboard.drawBlocks();
+            //colorAnimation.addLast(getFrame(leaderboard.img, lbTitle));
+
+            System.out.println("Took: " + (System.currentTimeMillis() - t));
+            System.out.println();
 
             r.qRender(colorAnimation);
 
-            r.qWait(600);
+            r.qWait(300);
 
             ArrayList<BufferedImage> fadeOut = new ArrayList<>();
 
             for (int i = 0; i <= 30; i++) {
-                fadeOut.add(getFrame(leaderboard.img, 30 - i, 30, lbTitle));
+                fadeOut.add(getFrame(leaderboard.img, (30f - i) / 30, lbTitle));
             }
 
             r.render();
@@ -329,32 +358,41 @@ public class Main {
         if (pl <= 24) return 3;
         if (pl <= 44) return 4;
         if (pl <= 65) return 5;
-        return 6;
+        if (pl <= 96) return 6;
+        if (pl <= 126) return 7;
+        if (pl <= 160) return 8;
+        if (pl <= 198) return 9;
+        if (pl <= 240) return 10;
+        if (pl <= 275) return 11;
+        if (pl <= 324) return 12;
+
+        throw new Error("Too many players!");
     }
 
     static int getRows(int pl, int columns) {
         int i = pl / columns;
         if (i * columns < pl) i++;
+        if (i < 1) i = 1;
         return i; 
     }
 
     static BufferedImage getFrame(BufferedImage img) {
-        return getFrame(img, false, 1, 1, false, null);
+        return getFrame(img, false, 1.0f, false, null);
     }
 
-    static BufferedImage getFrame(BufferedImage img, int a, int b) {
-        return getFrame(img, true, a, b, false, null);
+    static BufferedImage getFrame(BufferedImage img, float alpha) {
+        return getFrame(img, true, alpha, false, null);
     }
 
     static BufferedImage getFrame(BufferedImage img, Title title) {
-        return getFrame(img, false, 1, 1, true, title);
+        return getFrame(img, false, 1.0f, true, title);
     }
 
-    static BufferedImage getFrame(BufferedImage img, int a, int b, Title title) {
-        return getFrame(img, true, a, b, true, title);
+    static BufferedImage getFrame(BufferedImage img, float alpha, Title title) {
+        return getFrame(img, true, alpha, true, title);
     }
 
-    private static BufferedImage getFrame(BufferedImage img, boolean fade, int a, int b, boolean hasTitle, Title title) {
+    private static BufferedImage getFrame(BufferedImage img, boolean fade, float alpha, boolean hasTitle, Title title) {
 
         int heightMargin = 0;
         int titleX = 0;
@@ -374,33 +412,19 @@ public class Main {
 
         if (hasTitle) {
             if (fade) {
-                g.drawImage(getOp(a, b).filter(title.img, null), titleX, titleY, null);
+                g.drawImage(renderWithAlpha(title.img, alpha), titleX, titleY, null);
             } else {
                 g.drawImage(title.img, titleX, titleY, null);
             }
         }
 
         if (fade) {
-            g.drawImage(getOp(a, b).filter(img, null), x, y, null);
+            g.drawImage(renderWithAlpha(img, alpha), x, y, null);
         } else {
             g.drawImage(img, x, y, null);
         }
         g.dispose();
         return frame;
-    }
-
-    static Long sleepTime(int fps) {
-        Long a = System.currentTimeMillis();
-        Long b = a / 1000 * 1000;
-        a -= b;
-
-        int i = 1;
-        while (true) {
-            Double c = 1000d * i / fps;
-            Long d = Math.round(c);
-            if (d > a) return d - a;
-            i++;
-        }
     }
 
     static Color fadeColor(Color a, Color b, int x, int n) {
@@ -431,7 +455,17 @@ public class Main {
 
     static RescaleOp getOp(int a, int b) {
         float alpha;
-        if (a > b) alpha = 1f; else alpha = (a * 1.0f) / (b * 1.0f);
+        alpha = (a * 1.0f) / (b * 1.0f);
+        return getOp(alpha);
+    }
+
+    static RescaleOp getOp(float alpha) {
+        if (alpha < 0.0f) alpha = 0.0f;
+        if (alpha > 1.0f) alpha = 1.0f;
         return new RescaleOp(new float[]{1f, 1f, 1f, alpha}, new float[]{0f, 0f, 0f, 0f}, null);
+    }
+
+    static BufferedImage renderWithAlpha(BufferedImage img, float alpha) {
+        return getOp(alpha).filter(img, null);
     }
 }

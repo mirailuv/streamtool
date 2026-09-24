@@ -122,6 +122,8 @@ public class Leaderboard {
 
         Player[] regList = data.players;
 
+        int playersWithPoints = 0;
+
         int completionPoints = regList.length / 2;
 
         if (run.overrides[4] != -1) completionPoints = run.overrides[4] - 5;
@@ -202,6 +204,8 @@ public class Leaderboard {
 
         JSONArray lbPlayers = new JSONArray();
 
+        for (int i = 0; i < regList.length; i++) if (regList[i].lb_played && regList[i].lb_points > 0) playersWithPoints++;
+
         for (int i = 0; i < regList.length; i++) {
             if (regList[i].lb_played) {
 
@@ -252,6 +256,24 @@ public class Leaderboard {
         for (JSONObject obj : jsonList) {
             obj.remove("avg_ms");
             sortedLeaderboard.put(obj);
+        }
+
+        for (int i = 0; i < sortedLeaderboard.length(); i++) {
+            int revRank = playersWithPoints - i;
+            if (revRank < 0) revRank = 0;
+            int perf = (int) Math.round((revRank * 1000.0) / playersWithPoints);
+            String s = perf + "";
+            int l = s.length();
+            if (l == 1) {
+                s = "00";
+                l = 2;
+            }
+
+            String p = s.substring(0, l-1) + "." + s.substring(l-1) + "%";
+            String f = revRank + "/" + playersWithPoints;
+
+            sortedLeaderboard.getJSONObject(i).put("perfFraction", f);
+            sortedLeaderboard.getJSONObject(i).put("perfRounded", p);
         }
 
         leaderboard.put("players", sortedLeaderboard);

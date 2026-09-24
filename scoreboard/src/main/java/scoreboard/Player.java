@@ -1,4 +1,4 @@
-package common;
+package scoreboard;
 
 import java.awt.Color;
 
@@ -99,8 +99,6 @@ class Player {
         if (block == null) return;
 
         block.newColor(color);
-        block.setPlayer(username);
-        block.setPoints(points);
     }
 
     boolean fadeActive = false;

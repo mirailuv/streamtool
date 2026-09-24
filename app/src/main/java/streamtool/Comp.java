@@ -3,6 +3,7 @@ package streamtool;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.json.JSONArray;
@@ -11,18 +12,7 @@ import org.json.JSONObject;
 import common.Api;
 
 public class Comp {
-    public static JSONObject updateCompletions(Player[] regPlayers, int seedNumber, RuntimeData run) {
-        JSONObject result = null;
-        try {
-            result = updateCompletionsUnsafe(regPlayers, seedNumber, run);
-        } catch (Exception e) {
-            result = null;
-        }
-
-        return result;
-    }
-
-    public static JSONObject updateCompletionsUnsafe(Player[] regPlayers, int seedNumber, RuntimeData run) throws Exception {
+    public static JSONObject getCompletions(Player[] regPlayers, int seedNumber, RuntimeData run, Data data) {
         int completionPoints = regPlayers.length / 2;
 
         if (run.overrides[4] != -1) completionPoints = run.overrides[4] - 5;
@@ -35,12 +25,11 @@ public class Comp {
         int matchId;
 
         if (seedNumber > 0) {
-
             matchId = run.getMatchId(seedNumber);
 
             if (matchId == -1) {
                 System.out.println("matchId not found");
-                throw new Exception("matchId");
+                return null;
             }
 
             file = Paths.get("lb_data", "matches", matchId+".json").toFile();
@@ -60,42 +49,29 @@ public class Comp {
         for (int i = 0; i < comp.length(); i++) {
             JSONObject pl3 = (JSONObject) comp.get(i);
             if (!isRegistered(getName((String) pl3.get(uuidKey), players), regPlayers)) {
+                System.out.println("Removed " + getName((String) pl3.get(uuidKey), players));
                 comp.remove(i);
                 i--;
             }
         }
 
-        BufferedWriter w11 = new BufferedWriter(new FileWriter(Paths.get("output","comp11.txt").toFile()));
-        BufferedWriter w12 = new BufferedWriter(new FileWriter(Paths.get("output","comp12.txt").toFile()));
-        BufferedWriter w13 = new BufferedWriter(new FileWriter(Paths.get("output","comp13.txt").toFile()));
+        JSONArray completionsJson = new JSONArray();
 
-        BufferedWriter w21 = new BufferedWriter(new FileWriter(Paths.get("output","comp21.txt").toFile()));
-        BufferedWriter w22 = new BufferedWriter(new FileWriter(Paths.get("output","comp22.txt").toFile()));
-        BufferedWriter w23 = new BufferedWriter(new FileWriter(Paths.get("output","comp23.txt").toFile()));
-
-        int compLength = comp.length();
-        if (compLength > 26) compLength = 26;
-        int c1ln = 0;
-        int c2ln = 0;
-
-
-        if (compLength > 13) {
-            c2ln = compLength / 2;
-            c1ln = compLength - c2ln;
-        } else c1ln = compLength;
-
-        for (int i = 0; i < c1ln; i++) {
+        for (int i = 0; i < comp.length(); i++) {
             JSONObject o2 = (JSONObject) comp.get(i);
             String uuid = (String) o2.get(uuidKey);
             int time = (int) o2.get("time");
             int seconds = time / 1000;
             int minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
+            int ms = time - (minutes * 60000) - (seconds * 1000);
             String minuteString;
             String secondString;
+            String msString;
             if (minutes < 10) minuteString = "0" + minutes; else minuteString = "" + minutes;
             if (seconds < 10) secondString = "0" + seconds; else secondString = "" + seconds;
-            String timeString = minuteString + ":" + secondString;
+            if (ms < 10) msString = "00" + ms; else if (ms < 100) msString = "0" + ms; else msString = "" + ms;
+            String timeString = minuteString + ":" + secondString + "." + msString;
             int points = 0;
             if (i < completionPoints) points += completionPoints - i;
             if (i == 0) points += 5;
@@ -103,47 +79,31 @@ public class Comp {
             if (i == 2) points += 1;
             if (points <= 0) points = 1;
             String pointString = "" + points;
-
             String name = getName(uuid, players);
 
-            w11.write(name); w11.newLine();
-            w12.write(timeString); w12.newLine();
-            w13.write(pointString); w13.newLine();
+            JSONObject co = new JSONObject();
+
+            System.out.println(name + " " + timeString + " " + pointString);
+
+            co.put("name", name);
+            co.put("time", timeString);
+            co.put("points", pointString);
+
+            completionsJson.put(co);
         }
-
-        if (c2ln > 0) for (int i = c1ln; i < c2ln + c1ln; i++) {
-            JSONObject o2 = (JSONObject) comp.get(i);
-            String uuid = (String) o2.get(uuidKey);
-            int time = (int) o2.get("time");
-            int seconds = time / 1000;
-            int minutes = seconds / 60;
-            seconds = seconds - (minutes * 60);
-            String minuteString;
-            String secondString;
-            if (minutes < 10) minuteString = "0" + minutes; else minuteString = "" + minutes;
-            if (seconds < 10) secondString = "0" + seconds; else secondString = "" + seconds;
-            String timeString = minuteString + ":" + secondString;
-            int points = 0;
-            if (i < completionPoints) points += completionPoints - i;
-            if (i == 0) points += 5;
-            if (i == 1) points += 3;
-            if (i == 2) points += 1;
-            if (points <= 0) points = 1;
-            String pointString = "" + points;
-
-
-            String name = getName(uuid, players);
-
-            w21.write(name); w21.newLine();
-            w22.write(timeString); w22.newLine();
-            w23.write(pointString); w23.newLine();
-        }
-
-        w11.close(); w12.close(); w13.close(); w21.close(); w22.close(); w23.close();
 
         JSONObject returnData = new JSONObject();
-        returnData.put("page1", c1ln);
-        returnData.put("page2", c2ln);
+        returnData.put("completions", completionsJson);
+        returnData.put("seedNum", seedNumber);
+        if (seedNumber == 0) returnData.put("seedNum", data.currentSeed);
+        returnData.put("seedCount", Main.getSeedcount(data.leagueNumber));
+
+        // TODO REMOVE
+        try {
+            BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("lb_data", "completions.json").toFile()));
+            w.write(returnData.toString());
+            w.close();
+        } catch (IOException e) {}
 
         return returnData;
     }

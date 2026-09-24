@@ -1,2 +1,2 @@
 rootProject.name = 'streamtool'
-include('common', 'app', 'testnew')
+include('common', 'app', 'scoreboard')

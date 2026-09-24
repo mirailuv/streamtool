@@ -1,4 +1,4 @@
-package testnew;
+package scoreboard;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -7,9 +7,9 @@ import java.net.URISyntaxException;
 import org.json.JSONObject;
 
 import common.Api;
-import streamtool.Client;
+import common.Client;
 
-public class Main {
+public class Test {
     public static void main(String[] args) throws URISyntaxException, InterruptedException, MalformedURLException, IOException {
         System.out.println("TEST");
 

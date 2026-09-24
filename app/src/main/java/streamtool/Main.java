@@ -22,11 +22,13 @@ import common.FileSelect;
 
 public class Main {
 
+    static Long abDelay = 0L;
+
     public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
 
         Files.createDirectories(Paths.get("lb_data", "matches"));
 
-        Files.createDirectories(Paths.get("out_heads"));
+        Files.createDirectories(Paths.get("heads"));
         Files.createDirectories(Paths.get("output"));
 
         RuntimeData run = new RuntimeData();
@@ -37,30 +39,16 @@ public class Main {
         run.obsLayout = Api.readJSON(Paths.get("obs_layout.json").toFile());
 
         run.portRange = run.obsLayout.getInt("portRange"); // ports for streamlink feeds, they are this value + playerId
-        run.useStreamlink = run.obsLayout.getBoolean("useStreamlink");
-
-        JSONArray bH = run.obsLayout.getJSONArray("boardHeight");
-        int[] bh2 = new int[bH.length()];
-        for (int i = 0; i < bh2.length; i++) bh2[i] = bH.getInt(i);
-        run.boardHeight = bh2;
-
-        JSONArray pzH = run.obsLayout.getJSONArray("promoteHeight");
-        int[] pzh2 = new int[pzH.length()];
-        for (int i = 0; i < pzh2.length; i++) pzh2[i] = pzH.getInt(i);
-        run.promoteZoneHeight = pzh2;
-
-        JSONArray dZ = run.obsLayout.getJSONArray("demoteZonePos");
-        int[] dz2 = new int[dZ.length()];
-        for (int i = 0; i < dz2.length; i++) dz2[i] = dZ.getInt(i);
-        run.demoteZonePos = dz2;
-
         run.scenes = (JSONObject) run.obsLayout.get("scenes");
         run.audio = (JSONObject) run.obsLayout.get("audio");
         run.paths = (JSONObject) run.obsLayout.get("paths");
 
+        abDelay = run.obsLayout.optLong("switchDelay", 0L);
+
         run.imagePath = (String) run.paths.get("heads");
         run.seediconPath = (String) run.paths.get("seed_icons");
         run.seedimagePath = (String) run.paths.get("seed_images");
+        run.imageGenPath = (String) run.paths.get("gen_images");
 
         run.seedList = new JSONObject();
 
@@ -71,12 +59,12 @@ public class Main {
 
         run.fs = new FileSelect();
 
-        run.client = new Client(new URI("ws://127.0.0.1:4455"), run.enableSocket, run.useStreamlink, run.imagePath, run.portRange);
-        if (run.client.enable) run.client.connectBlocking();
+        run.client = new ClientHandler(new URI("ws://127.0.0.1:4455"), run);
+        run.client.connect();
 
         run.scanner = new Scanner(System.in);
 
-        if (run.client.enable) run.client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
+        run.client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
 
         Data data = new Data();
 
@@ -130,7 +118,7 @@ public class Main {
         run.timer.stop();
         Streamlink.killAll();
 
-        if (run.client.enable) run.client.close();
+        run.client.close();
     }
 
     static void downloadOrder(int leagueNumber, int weekNumber) throws MalformedURLException, IOException, URISyntaxException {
@@ -179,7 +167,7 @@ public class Main {
         }
     }
 
-    static void setMute(Client client, JSONObject audio, boolean muted) {
+    static void setMute(ClientHandler client, JSONObject audio, boolean muted) {
         String mic = audio.getString("mic");
         String disc = audio.getString("disc");
 
@@ -369,7 +357,7 @@ class Player {
         if (twitch.equals("")) live = false; else live = true;
 
         try {
-            GetImg.getImg(name);
+            Api.getHead(name, 100);
         } catch (Exception e) {}
     }
 }
@@ -401,11 +389,7 @@ class RuntimeData {
     JSONObject obsLayout;
 
     int portRange;
-    boolean useStreamlink;
-
-    int[] boardHeight;
-    int[] promoteZoneHeight;
-    int[] demoteZonePos;
+    boolean useStreamlink = true;
 
     JSONObject scenes;
     JSONObject audio;
@@ -414,6 +398,7 @@ class RuntimeData {
     String imagePath;
     String seediconPath;
     String seedimagePath;
+    String imageGenPath;
 
     JSONObject seedList;
 
@@ -422,7 +407,7 @@ class RuntimeData {
 
     boolean spectating = false;
 
-    Client client;
+    ClientHandler client;
     FileSelect fs;
 
     int[] matchIds = new int[0];

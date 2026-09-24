@@ -8,7 +8,7 @@ public class Timer {
     int duration;
     int time;
     boolean reverse;
-    Client client;
+    ClientHandler client;
     String sourceName = "";
     String endMessage = "";
 

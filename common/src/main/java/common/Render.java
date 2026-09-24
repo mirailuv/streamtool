@@ -8,23 +8,38 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
 
 public class Render implements Runnable {
 
-    JFrame frame;
+    static Long sleepTime(int fps) {
+        Long a = System.currentTimeMillis();
+        Long b = a / 1000 * 1000;
+        a -= b;
 
-    Canvas canvas;
+        int i = 1;
+        while (true) {
+            Double c = 1000d * i / fps;
+            Long d = Math.round(c);
+            if (d > a) return d - a;
+            i++;
+        }
+    }
 
-    boolean running;
-    boolean paused = false;
-    boolean rendering = false;
-    boolean stopped = false;
-    ArrayList<RenderObject> renderQ = new ArrayList<>();
-    RenderObject current = null;
+    public JFrame frame;
+
+    public Canvas canvas;
+
+    public boolean running;
+    public boolean paused = false;
+    public boolean rendering = false;
+    public boolean stopped = false;
+    public ArrayList<RenderObject> renderQ = new ArrayList<>();
+    public RenderObject current = null;
+
+    int fps;
 
     int pauseAfter = -1;
 
@@ -65,7 +80,7 @@ public class Render implements Runnable {
                 }
             }
             try {
-                Long sleepTime = Main.sleepTime(60);
+                Long sleepTime = sleepTime(fps);
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {}
         }
@@ -106,6 +121,12 @@ public class Render implements Runnable {
     }
 
     public Render() {
+        this(60);
+    }
+
+    public Render(int fps) {
+        this.fps = fps;
+
         frame = new JFrame();
         canvas = new Canvas();
 
@@ -145,13 +166,13 @@ public class Render implements Runnable {
         canvas.createBufferStrategy(2);
     }
 
-    void clear() {
+    public void clear() {
         Graphics g = canvas.getBufferStrategy().getDrawGraphics();
         if (g != null) g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         canvas.getBufferStrategy().show();
     }
 
-    void close() {
+    public void close() {
         frame.setVisible(false);
         frame.dispose();
     }
@@ -166,32 +187,18 @@ public class Render implements Runnable {
         Toolkit.getDefaultToolkit().sync();
     }
 
-    void qRender(ArrayList<BufferedImage> frames) {
+    public void qRender(ArrayList<BufferedImage> frames) {
         System.out.println("Queued " + frames.size() + " frames");
 
         RenderObject o = new RenderObject(frames);
         renderQ.addLast(o);
     }
 
-    void qWait(int frames) {
+    public void qWait(int frames) {
         System.out.println("Queued " + frames + " blanks");
 
         RenderObject o = new RenderObject(frames);
         renderQ.addLast(o);
-    }
-
-    void test() {
-        Random random = new Random();
-        Color color = new Color(random.nextInt(256),random.nextInt(256),random.nextInt(256),random.nextInt(256));
-        Graphics g = canvas.getBufferStrategy().getDrawGraphics();
-        int width = random.nextInt(canvas.getWidth());
-        int height = random.nextInt(canvas.getHeight());
-
-        if (g != null) {
-            g.setColor(color);
-            g.fillRect(0, 0, width, height);
-        }
-        canvas.getBufferStrategy().show();
     }
 }
 

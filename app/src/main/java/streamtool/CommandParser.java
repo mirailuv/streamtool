@@ -30,9 +30,9 @@ public class CommandParser {
             return result;
         }
 
-        for (int i = 0; i < splitCommand.length; i++) splitCommand[i] = splitCommand[i].toLowerCase().replaceAll(" ","");
+        for (int i = 0; i < splitCommand.length; i++) splitCommand[i] = splitCommand[i].replaceAll(" ","");
 
-        String commandType = splitCommand[0];
+        String commandType = splitCommand[0].toLowerCase();
 
         result.put("invalid", 0);
 
@@ -41,6 +41,9 @@ public class CommandParser {
         switch(commandType) {
             case "quit":
                 result.put("command", "quit"); // quit the program
+                break;
+            case "test":
+                result.put("command", "test");
                 break;
             case "restore":
                 result.put("command", "restore"); // restore previous data
@@ -71,17 +74,17 @@ public class CommandParser {
                 result.put("command", "import"); // import players
                 result.put("value", false);
                 if (splitCommand.length > 1) {
-                    if (splitCommand[1].equals("true")) result.put("value", true);
+                    if (splitCommand[1].toLowerCase().equals("true")) result.put("value", true);
                 }
                 break;
             case "order", "seedorder":
                 result.put("command", "order");
                 result.put("value", 0);
                 if (splitCommand.length > 1) {
-                    if (splitCommand[1].equals("file")) result.put("value", 1);
-                    if (splitCommand[1].equals("api")) result.put("value", 3);
-                    if (splitCommand[1].equals("show")) result.put("value", 4);
-                    if (splitCommand[1].equals("skip")) {
+                    if (splitCommand[1].toLowerCase().equals("file")) result.put("value", 1);
+                    if (splitCommand[1].toLowerCase().equals("api")) result.put("value", 3);
+                    if (splitCommand[1].toLowerCase().equals("show")) result.put("value", 4);
+                    if (splitCommand[1].toLowerCase().equals("skip")) {
                         result.put("value", 2);
                         result.put("var", data.currentSeed);
                         if (splitCommand.length > 2) {
@@ -97,18 +100,18 @@ public class CommandParser {
             case "mute":
                 result.put("command", "mute");
                 if (splitCommand.length > 1) {
-                    if (splitCommand[1].equals("true")) result.put("value", 1); // true -> mute mic and discord (if enabled)
-                    if (splitCommand[1].equals("false")) result.put("value", 2); // false -> unmute mic and discord (if enabled)
+                    if (splitCommand[1].toLowerCase().equals("true")) result.put("value", 1); // true -> mute mic and discord (if enabled)
+                    if (splitCommand[1].toLowerCase().equals("false")) result.put("value", 2); // false -> unmute mic and discord (if enabled)
                 } else result.put("value", 0); // no argument -> toggle mute (if enabled)
                 break;
             case "update":
                 result.put("command", "update");
                 result.put("value", 0); // no argument / unknown argument -> update once
                 if (splitCommand.length > 1) {
-                    if (splitCommand[1].equals("auto")) result.put("value", 1); // auto -> enable auto-update
-                    if (splitCommand[1].equals("off") || splitCommand[1].equals("stop")) result.put("value", 2); // off/stop -> disable auto-update
-                    if (splitCommand[1].equals("random")) result.put("value", 3); // random -> put random povs on the screen
-                    if (splitCommand[1].equals("nomsg")) result.put("value", 4);
+                    if (splitCommand[1].toLowerCase().equals("auto")) result.put("value", 1); // auto -> enable auto-update
+                    if (splitCommand[1].toLowerCase().equals("off") || splitCommand[1].toLowerCase().equals("stop")) result.put("value", 2); // off/stop -> disable auto-update
+                    if (splitCommand[1].toLowerCase().equals("random")) result.put("value", 3); // random -> put random povs on the screen
+                    if (splitCommand[1].toLowerCase().equals("nomsg")) result.put("value", 4);
                 }
                 break;
             case "split", "splits":
@@ -117,7 +120,7 @@ public class CommandParser {
             case "show":
                 result.put("command", "show"); // show a selected player on screen at a selected position
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     int playerId = identify(s);
                     if (playerId != -1) result.put("id", playerId); else valid = false;
                 } else valid = false;
@@ -154,7 +157,7 @@ public class CommandParser {
                     if (ip.success) seedNumber = ip.i; else valid = false;
 
                     // check if the number is within range
-                    if (seedNumber < 0 || seedNumber > Main.getSeedcount(data.leagueNumber)) valid = false;
+                    if (seedNumber < 0 || seedNumber > Main.getSeedcount(data.leagueNumber) + 1) valid = false;
 
                     result.put("value", seedNumber);
                 } else valid = false;
@@ -162,7 +165,7 @@ public class CommandParser {
             case "scene":
                 result.put("command", "scene");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     switch (s) {
                         case "im", "intermission":
                             result.put("value", "intermission");
@@ -219,7 +222,7 @@ public class CommandParser {
             case "interview":
                 result.put("command", "interview");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     int id = identify(s);
                     if (id != -1) result.put("id", id); else valid = false;
                 } else valid = false;
@@ -227,7 +230,7 @@ public class CommandParser {
             case "timer":
                 result.put("command", "timer");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     switch (s) {
                         case "game", "up":
                             result.put("value", "up");
@@ -297,7 +300,7 @@ public class CommandParser {
             case "match":
                 result.put("command", "match");
                 if (splitCommand.length > 1) {
-                    String value = splitCommand[1];
+                    String value = splitCommand[1].toLowerCase();
                     switch (value) {
                         case "clear", "autodl":
                             result.put("value", value);
@@ -342,15 +345,15 @@ public class CommandParser {
                 result.put("command", "setlive");
 
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     int id = identify(s);
                     if (id != -1) result.put("id", id); else valid = false;
                 } else valid = false;
 
                 result.put("value", 0);
                 if (splitCommand.length > 2) {
-                    if (splitCommand[2].equals("true")) result.put("value", 1);
-                    if (splitCommand[2].equals("false")) result.put("value", 2);
+                    if (splitCommand[2].toLowerCase().equals("true")) result.put("value", 1);
+                    if (splitCommand[2].toLowerCase().equals("false")) result.put("value", 2);
                 }
                 break;
             case "addplayer":
@@ -364,13 +367,13 @@ public class CommandParser {
             case "twitch":
                 result.put("command", "twitch");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     int playerId = identify(s);
                     if (playerId != -1) result.put("id", playerId); else valid = false;
                 } else valid = false;
 
                 if (valid && splitCommand.length > 2) {
-                    String twitch = splitCommand[2];
+                    String twitch = splitCommand[2].toLowerCase();
                     result.put("value", twitch);
                 }
                 break;
@@ -383,7 +386,7 @@ public class CommandParser {
             case "hide":
                 result.put("command", "hide");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     int playerId = identify(s);
                     if (playerId != -1) result.put("id", playerId); else valid = false;
                 } else valid = false;
@@ -397,7 +400,7 @@ public class CommandParser {
             case "override":
                 result.put("command", "override");
                 if (splitCommand.length > 2) {
-                    String var = splitCommand[1];
+                    String var = splitCommand[1].toLowerCase();
                     String s = splitCommand[2];
 
                     IntParser ip = parseInt(s);
@@ -410,7 +413,7 @@ public class CommandParser {
                             default:
                                 valid = false;
                         }
-                    } else if (splitCommand.length > 1 && splitCommand[1].equals("reset")) {
+                    } else if (splitCommand[1].equals("reset")) {
                         result.put("var", "reset");
                     } else valid = false;
                 } else if (splitCommand.length > 1 && splitCommand[1].equals("reset")) {
@@ -420,7 +423,7 @@ public class CommandParser {
             case "snapshot":
                 result.put("command", "snapshot");
                 if (splitCommand.length > 1) {
-                    String s = splitCommand[1];
+                    String s = splitCommand[1].toLowerCase();
                     switch (s) {
                         case "start":
                             result.put("value", 1);

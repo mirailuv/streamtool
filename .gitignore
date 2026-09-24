@@ -4,8 +4,8 @@
 app/build
 app/bin
 app/libs
-testnew/bin
-testnew/build
+scoreboard/bin
+scoreboard/build
 common/bin
 common/build
 build
@@ -23,3 +23,9 @@ websocket_log.txt
 obs_layout.json
 heads
 skins
+newlb1
+newlb2
+newlb3
+newlb4
+newlb5
+newlb6

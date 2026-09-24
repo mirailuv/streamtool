@@ -1,4 +1,4 @@
-package common;
+package scoreboard;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import common.Api;
 
 public class Datagen {
     public static void gen(String folder, int[] matches, JSONArray playerlist, int league) throws IOException {

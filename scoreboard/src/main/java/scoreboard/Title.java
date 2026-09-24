@@ -1,4 +1,4 @@
-package common;
+package scoreboard;
 
 import java.awt.Color;
 import java.awt.Font;
