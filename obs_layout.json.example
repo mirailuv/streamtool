@@ -1,38 +1,25 @@
 {
-	"boardHeight": [1372, 1324, 1276, 1228, 1180, 1132, 1084, 1036, 988, 940, 892, 844, 796],
-	"promoteHeight": [622, 571, 519, 468, 417, 366, 314, 263, 212, 160, 109, 58, 0],
-	"demoteZonePos": [68, 120, 170, 218, 266, 313, 362, 409, 457, 505, 554, 602, 650],
-	
+	"format": 2,	
 	"scenes": {
 		"intermissionScene": "INTERMISSION",
 		"commentatorScene": "COMMENTATORS",
 		"completionScene": "COMPLETIONS",
-		"compIds": {
-			"comp1": 15,
-			"comp2": 21
-		},
 		"leaderboardScene": "LEADERBOARD",
-		"lbIds": {
-			"lb1": 14,
-			"lb2": 27,
-			"prom": 32,
-			"dem": 38
-		},
-		"lb1ids": [24, 23, 1, 32],
-		"lb2ids": [35, 36, 37, 38],
+		"averageLbScene": "AVERAGES",
 		"nextseedScene": "NEXT SEED",
-		"seedlistScenes": {
-			"seeds5": "SEEDS 5",
-			"seeds6": "SEEDS 6",
-			"seeds7": "SEEDS 7",
-			"seeds8": "SEEDS 8"
-		},
+		"seedlistScene": "SEED ORDER",
 		"spectatorScene": "SPECTATOR POV",
 		"gameplayScenes": {
 			"gameplay1": "MAIN 1",
 			"gameplay2": "MAIN 2",
 			"gameplay3": "MAIN 3",
 			"gameplay4": "MAIN 4"
+		},
+		"abIds": {
+			"p1": {"a": 17, "b": 27},
+			"p2": {"a": 21, "b": 28},
+			"p3": {"a": 22, "b": 29},
+			"p4": {"a": 20, "b": 30}
 		},
 		"interviewScene": "INTERVIEW"
 	},
@@ -43,11 +30,11 @@
 		"discEnabled": true
 	},
 	"paths": {
-		"heads": "/home/me/MCRL Streaming/streamtool/out_heads/",
+		"heads": "/home/me/MCRL Streaming/streamtool/heads/",
 		"seed_icons": "/home/me/MCRL Streaming/StreamAssets/Assets/seedtype-icons/",
-		"seed_images": "/home/me/MCRL Streaming/StreamAssets/Assets/seed_background/"
+		"seed_images": "/home/me/MCRL Streaming/StreamAssets/Assets/seed_background/",
+		"gen_images": "/home/me/MCRL Streaming/streamtool/gen_images/"
 	},
-
-	"useStreamlink" : true,
-	"portRange": 7000
+	"portRange": 7000,
+	"switchDelay": 5000
 }
