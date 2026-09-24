@@ -21,6 +21,7 @@ spectate_match.json
 download.json
 websocket_log.txt
 obs_layout.json
+MATCH_IDS.txt
 heads
 skins
 newlb_1
