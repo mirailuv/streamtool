@@ -238,6 +238,25 @@ public class CommandManager {
 
         if (file == null) return 0;
 
+        if (file.exists()) {
+            data.clearPlayers();
+            JSONArray array = Api.readJSONArray(file);
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject o = array.getJSONObject(i);
+                String name = o.getString("ign");
+                String twitch = Main.fixLink(o.getString("twitch_username"));
+                int id = data.players.length;
+                System.out.println(id + " " + name);
+                Player player = new Player(name, twitch, id);
+                data.addPlayer(player);
+            }
+            System.out.println("Import complete");
+            
+        } else {
+            System.out.println("Invalid file");
+            return 0;
+        }
+
         if (commandObject.getBoolean("value")) {
             String fileName = file.getName();
             String lnum = fileName.substring(5, 6);
@@ -265,25 +284,6 @@ public class CommandManager {
             } else {
                 System.out.println("Unable to parse league / week information, update this manually with setinfo");
             }
-        }
-
-        if (file.exists()) {
-            data.clearPlayers();
-            JSONArray array = Api.readJSONArray(file);
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject o = array.getJSONObject(i);
-                String name = o.getString("ign");
-                String twitch = Main.fixLink(o.getString("twitch_username"));
-                int id = data.players.length;
-                System.out.println(id + " " + name);
-                Player player = new Player(name, twitch, id);
-                data.addPlayer(player);
-            }
-            System.out.println("Import complete");
-            
-        } else {
-            System.out.println("Invalid file");
-            return 0;
         }
 
         return 1;
