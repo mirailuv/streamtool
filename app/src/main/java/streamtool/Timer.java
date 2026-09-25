@@ -81,8 +81,5 @@ public class Timer {
     void stop() {
         System.out.println("Stopping timer");
         isRunning = false;
-        try {
-            Thread.sleep(1200);
-        } catch (InterruptedException e) {}
     }
 }
