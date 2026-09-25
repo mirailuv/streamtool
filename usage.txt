@@ -30,7 +30,8 @@ switching from intermission at the start:
 > order show		// show the seed order.
 
 when ready to start the seed:
-> next			// increment the current seed, show the next seed type.
+> next			// increment the current seed, show the next seed type in the order.
+> scene ns		// show the seed type on its own scene
 > update		// switch to main screen when loaded in and update the top 4 people who are playing. this is initially done by the order they appear in the reg list, and later by points.
 > start			// start the timer for the seed. enable auto-update.
 
@@ -66,7 +67,6 @@ when it's time for break:
 after break:
 > scene co		// switch to commentators. welcome people back after the intermission.
 > leaderboard		// show the leaderboard again. (optional)
-> order show		// show the seed order again. (optional)
 // then just start the next seed with the previous instructions.
 
 interview and ending stream:
