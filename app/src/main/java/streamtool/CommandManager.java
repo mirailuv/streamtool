@@ -481,7 +481,11 @@ public class CommandManager {
                 run.commandManager.execute(run.commandParser.getCommand("mute false"));
                 run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + run.scenes.get("leaderboardScene") + "\"}}}");
                 return 1;
-
+            case "multiweek":
+                System.out.println("Multi-week");
+                run.commandManager.execute(run.commandParser.getCommand("mute false"));
+                run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetCurrentProgramScene\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + run.scenes.get("multiweekScene") + "\"}}}");
+                return 1;
             case "commentators": 
                 System.out.println("Commentators");
                 run.commandManager.execute(run.commandParser.getCommand("mute false"));

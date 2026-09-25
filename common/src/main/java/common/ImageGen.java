@@ -343,14 +343,14 @@ public class ImageGen {
 
         JSONArray players = lb.getJSONArray("players");
 
-        BufferedImage title = new BufferedImage(900, 100, 2);
+        BufferedImage title = new BufferedImage(970, 100, 2);
         String titleTxt = "Multi-week scores";
 
         if (true) {
             Graphics2D g = title.createGraphics();
             g.setFont(font80);
             g.setBackground(main);
-            g.clearRect(0, 0, 900, 100);
+            g.clearRect(0, 0, 970, 100);
             g.drawString(titleTxt, 10, 82);
             g.dispose();
         }

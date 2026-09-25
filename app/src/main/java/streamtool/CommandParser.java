@@ -204,6 +204,9 @@ public class CommandParser {
                         case "lb", "leaderboard":
                             result.put("value", "leaderboard");
                             break;
+                        case "mw", "multiweek", "avg", "average", "averages":
+                            result.put("value", "multiweek");
+                            break;
                         case "co", "com", "comm", "comms", "commentators":
                             result.put("value", "commentators");
                             break;

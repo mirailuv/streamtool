@@ -5,7 +5,7 @@
 		"commentatorScene": "COMMENTATORS",
 		"completionScene": "COMPLETIONS",
 		"leaderboardScene": "LEADERBOARD",
-		"averageLbScene": "AVERAGES",
+		"multiweekScene": "AVERAGES",
 		"nextseedScene": "NEXT SEED",
 		"seedlistScene": "SEED ORDER",
 		"spectatorScene": "SPECTATOR POV",
