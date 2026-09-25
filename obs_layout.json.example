@@ -36,5 +36,13 @@
 		"gen_images": "/home/me/MCRL Streaming/streamtool/gen_images/"
 	},
 	"portRange": 7000,
-	"switchDelay": 5000
+	"switchDelay": 5000,
+	"bgIds": {
+		"l1": 5,
+		"l2": 8,
+		"l3": 22,
+		"l4": 27,
+		"l5": 33,
+		"l6": 41
+	}
 }

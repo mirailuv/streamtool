@@ -208,6 +208,14 @@ public class Main {
         return result;
     }
 
+    static void setBackground(Data data, RuntimeData run) {
+        for (int i = 1; i <= 6; i++) {
+            boolean visible = false;
+            if (i == data.leagueNumber) visible = true;
+            run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetSceneItemEnabled\", \"requestId\": \"0\", \"requestData\": {\"sceneName\": \"" + "background\", \"sceneItemId\": " + (run.obsLayout.getJSONObject("bgIds")).optInt("l" + i, 0) + ", \"sceneItemEnabled\": " + visible + "}}}");
+        }
+    }
+
     static void saveData(Data data, RuntimeData run) throws IOException {
 
         Player[] players = data.players;
