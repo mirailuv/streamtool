@@ -120,7 +120,6 @@ public class Data {
         try {
             updateSplits();
         } catch (Exception e) {
-            System.out.println("Exception: Failed to update splits");
             return new String[0];
         }
 
@@ -154,7 +153,6 @@ public class Data {
         try {
             updateSplits();
         } catch (Exception e) {
-            System.out.println("Exception: Failed to update splits");
             return new String[0];
         }
 

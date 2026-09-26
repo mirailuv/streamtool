@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import common.Api;
+import common.Fraction;
 import common.ImageGen;
 
 public class CommandManager {
@@ -20,6 +22,13 @@ public class CommandManager {
     public CommandManager(Data data, RuntimeData run) {
         this.data = data;
         this.run = run;
+    }
+
+    public int executeDelayed(JSONObject commandObject, Long delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {}
+        return execute(commandObject);
     }
 
     public int execute(JSONObject commandObject) {
@@ -76,8 +85,75 @@ public class CommandManager {
     int testCommand() {
         // TODO use this for testing stuff, remove anything later
 
-        JSONObject lb = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
-        ImageGen.leaderboard(lb, 1, 5);
+        Random r = new Random();
+
+        System.out.println();
+        System.out.println("Input 1");
+
+        int aB = r.nextInt(10, 91);
+        int bB = r.nextInt(10, 91);
+        int cB = r.nextInt(10, 91);
+
+        int aA = r.nextInt(0, aB + 1);
+        int bA = r.nextInt(0, bB + 1);
+        int cA = r.nextInt(0, cB + 1);
+
+        Fraction a = new Fraction(aA + "/" + aB);
+        System.out.println(a.get() + " ≈ " + a.getPercent());
+
+        Fraction b = new Fraction(bA + "/" + bB);
+        System.out.println(b.get() + " ≈ " + b.getPercent());
+
+        Fraction c = new Fraction(cA + "/" + cB);
+        System.out.println(c.get() + " ≈ " + c.getPercent());
+
+        Fraction combined1 = a;
+        combined1.add(b);
+        combined1.add(c);
+        combined1.div(3);
+
+        System.out.println();
+        System.out.println("Average");
+
+        System.out.println(combined1.get() + " ≈ " + combined1.getPercent());
+
+        System.out.println();
+        System.out.println("Input 2");
+
+        int dB = r.nextInt(10, 91);
+        int eB = r.nextInt(10, 91);
+        int fB = r.nextInt(10, 91);
+
+        int dA = r.nextInt(0, dB + 1);
+        int eA = r.nextInt(0, eB + 1);
+        int fA = r.nextInt(0, fB + 1);
+
+        Fraction d = new Fraction(dA + "/" + dB);
+        System.out.println(d.get() + " ≈ " + d.getPercent());
+
+        Fraction e = new Fraction(eA + "/" + eB);
+        System.out.println(e.get() + " ≈ " + e.getPercent());
+
+        Fraction f = new Fraction(fA + "/" + fB);
+        System.out.println(f.get() + " ≈ " + f.getPercent());
+
+        Fraction combined2 = d;
+        combined2.add(e);
+        combined2.add(f);
+        combined2.div(3);
+
+        System.out.println();
+        System.out.println("Average");
+
+        System.out.println(combined2.get() + " ≈ " + combined2.getPercent());
+
+        System.out.println();
+
+        int compare = Fraction.compare(combined1, combined2);
+
+        if (compare > 0) System.out.println("1 is higher");
+        if (compare < 0) System.out.println("2 is higher");
+        if (compare == 0) System.out.println("tie");
 
         return 1;
     }
@@ -772,7 +848,7 @@ public class CommandManager {
                         run.client.showPlayer(data.getPlayer(povs[i]), i + 1, false);
                     }
 
-                    run.commandManager.execute(run.commandParser.getCommand("scene update " + safety));
+                    run.commandManager.executeDelayed(run.commandParser.getCommand("scene update " + safety), Main.abDelay);
                 }
 
                 return 1;
