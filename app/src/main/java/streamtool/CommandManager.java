@@ -360,6 +360,8 @@ public class CommandManager {
             } else {
                 System.out.println("Unable to parse league / week information, update this manually with setinfo");
             }
+        } else {
+            run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"numPlayers\", \"overlay\": true, \"inputSettings\": {\"text\":\"Players: " + data.players.length + "\"}}}}");
         }
 
         return 1;
