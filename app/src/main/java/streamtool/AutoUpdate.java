@@ -25,6 +25,7 @@ public class AutoUpdate {
                     } catch (InterruptedException e) {}
 
                     if (!run.timer.isRunning) isRunning = false;
+                    if (run.timer.time + (Main.abDelay / 1000) > run.timer.duration) isRunning = false;
                 }
             }      
         }.start();
