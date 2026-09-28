@@ -21,6 +21,9 @@ public class ImageGen {
     static Color white = new Color(255, 255, 255, 255);
     static Color gray = new Color(193, 193, 193, 255);
 
+    static Color promote = new Color(127, 255, 127, 63);
+    static Color demote = new Color(255, 127, 127, 63);
+
     static Font font80 = new Font("Mojang", 1, 80);
     static Font font64 = new Font("Mojang", 1, 64);
 
@@ -285,6 +288,9 @@ public class ImageGen {
             BufferedImage block = new BufferedImage(width, height, 2);
             Graphics2D g = block.createGraphics();
             g.setBackground(main);
+
+            if (i == 0) g.setBackground(promote);
+
             g.clearRect(0, 0, width, height);
             g.setColor(white);
             g.setFont(new Font("Mojang", 1, namesize));
@@ -339,9 +345,12 @@ public class ImageGen {
         System.out.println("Image generated successfully");
     }
 
-        public static void averages(JSONObject lb) {
+    public static void averages(JSONObject lb) {
 
         JSONArray players = lb.getJSONArray("players");
+
+        int promotions = lb.optInt("promotions", 0);
+        int demotions = lb.optInt("demotions", 0);
 
         BufferedImage title = new BufferedImage(970, 100, 2);
         String titleTxt = "Multi-week scores";
@@ -367,6 +376,8 @@ public class ImageGen {
             String name = o.getString("name");
             String perf = o.getString("perfRounded");
 
+            if (perf.equals("100.0%")) perf = "Winner";
+
             int height = width/5;
             int margin = width/60;
 
@@ -385,6 +396,11 @@ public class ImageGen {
             BufferedImage block = new BufferedImage(width, height, 2);
             Graphics2D g = block.createGraphics();
             g.setBackground(main);
+
+            if (i < promotions) g.setBackground(promote);
+            if (i >= players.length() - demotions) g.setBackground(demote);
+            if (perf.equals("0.0%")) g.setBackground(demote);
+
             g.clearRect(0, 0, width, height);
             g.setColor(white);
             g.setFont(new Font("Mojang", 1, namesize));

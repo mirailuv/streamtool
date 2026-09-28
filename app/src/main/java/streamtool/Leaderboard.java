@@ -63,61 +63,6 @@ public class Leaderboard {
         return result;
     }
 
-    public static JSONObject loadLeaderboard(int[] overrides) throws IOException {
-        JSONObject leaderboard = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
-
-        JSONArray players = (JSONArray) leaderboard.get("players");
-
-        int playerCount = players.length();
-
-        int leagueNumber = (int) leaderboard.get("league");
-        int promotions = getPromotions(leagueNumber, playerCount);
-        int demotions = getDemotions(leagueNumber, playerCount);
-
-        int page1, page2;
-
-        if (playerCount > 26) {
-            page1 = 13; page2 = 13;
-        } else {
-            page2 = playerCount / 2; page1 = playerCount - page2;
-        }
-
-        if (overrides[2] != -1) page1 = overrides[2];
-        if (overrides[3] != -1) page2 = overrides[3];
-
-        JSONObject result = new JSONObject();
-        result.put("page1", page1);
-        result.put("page2", page2);
-        result.put("promotions", promotions);
-        result.put("demotions", demotions);
-
-        BufferedWriter w11 = new BufferedWriter(new FileWriter(Paths.get("output", "lb11.txt").toFile()));
-        BufferedWriter w12 = new BufferedWriter(new FileWriter(Paths.get("output", "lb12.txt").toFile()));
-        BufferedWriter w13 = new BufferedWriter(new FileWriter(Paths.get("output", "lb13.txt").toFile()));
-
-        BufferedWriter w21 = new BufferedWriter(new FileWriter(Paths.get("output", "lb21.txt").toFile()));
-        BufferedWriter w22 = new BufferedWriter(new FileWriter(Paths.get("output", "lb22.txt").toFile()));
-        BufferedWriter w23 = new BufferedWriter(new FileWriter(Paths.get("output", "lb23.txt").toFile()));
-
-        for (int i = 0; i < page1; i++) {
-            JSONObject player = (JSONObject) players.get(i);
-            w11.write((String) player.get("name")); w11.newLine();
-            w12.write((int) player.get("points") + ""); w12.newLine();
-            w13.write(((String) player.get("average")).substring(0, 5)); w13.newLine();
-        }
-
-        for (int i = 0; i < page2; i++) {
-            JSONObject player = (JSONObject) players.get(playerCount - page2 + i);
-            w21.write((String) player.get("name")); w21.newLine();
-            w22.write((int) player.get("points") + ""); w22.newLine();
-            w23.write(((String) player.get("average")).substring(0, 5)); w23.newLine();
-        }
-
-        w11.close(); w12.close(); w13.close(); w21.close(); w22.close(); w23.close();
-
-        return result;
-    }
-
     public static boolean genLeaderboard(int seedcount, Data data, RuntimeData run) {
 
         Player[] regList = data.players;
@@ -278,6 +223,9 @@ public class Leaderboard {
 
         leaderboard.put("players", sortedLeaderboard);
 
+        leaderboard.put("promotions", getPromotions(data.leagueNumber, sortedLeaderboard.length()));
+        leaderboard.put("demotions", getDemotions(data.leagueNumber, sortedLeaderboard.length()));
+
         File file = Paths.get("lb_data", "leaderboard.json").toFile();
 
         try {
@@ -299,23 +247,24 @@ public class Leaderboard {
         if (leagueNumber == 4) return 1200000;
         if (leagueNumber == 5) return 1500000;
         if (leagueNumber == 6) return 1800000;
+        if (leagueNumber == 7) return 3600000;
         return 0;
     }
 
     static int getPromotions(int leagueNumber, int playerCount) {
         if (leagueNumber == 1) return 0;
         int result = playerCount * 15 + 50;
-        return result /= 100;
+        return result / 100;
     }
 
     static int getDemotions(int leagueNumber, int playerCount) {
         if (leagueNumber == 6) return 0;
         if (leagueNumber == 1) {
             int result = playerCount * 20 + 50;
-            return result /= 100;
+            return result / 100;
         } else {
             int result = playerCount * 15 + 50;
-            return result /= 100;
+            return result / 100;
         }
     }
 }
