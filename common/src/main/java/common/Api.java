@@ -155,6 +155,135 @@ public class Api {
         hex.print();
     }
 
+    public static BufferedImage getInterviewSkin(String username) {
+
+        File skinPng = Paths.get("skins", username + ".png").toFile();
+        File skinProperties = Paths.get("skins", username + ".properties").toFile();
+        if (!skinPng.exists() || !skinProperties.exists()) {
+            try {
+                System.out.println("Skin file not found, attempting download");
+                dlSkin(username);
+            } catch (MalformedURLException e) {
+                System.out.println("MalformedURLException");
+                return null;
+            } catch (IOException e) {
+                System.out.println("IOException");
+                return null;
+            } catch (URISyntaxException e) {
+                System.out.println("URISyntaxException");
+                return null;
+            }
+        }
+
+        BufferedImage skinBg = new BufferedImage(64, 64, 1);
+        BufferedImage skinTransparent;
+
+        try {
+            skinTransparent = ImageIO.read(skinPng);
+        } catch (IOException e) {
+            System.out.println("IOException");
+            return null;
+        }
+
+        Graphics2D sG = skinBg.createGraphics();
+
+        sG.drawImage(skinTransparent, 0, 0, null);
+
+        sG.dispose();
+
+        JSONObject prop = Api.readJSON(skinProperties);
+        boolean slim = prop.optBoolean("slim", false);
+
+        int armWidth = 4;
+        if (slim) armWidth = 3;
+
+        Cuboid head = new Cuboid(15, 8, 8, 8);
+        Cuboid body = new Cuboid(15, 8, 12, 4);
+        Cuboid leftArm = new Cuboid(15, armWidth, 12, 4);
+        Cuboid rightArm = new Cuboid(15, armWidth, 12, 4);
+        Cuboid leftLeg = new Cuboid(15, 4, 12, 4);
+        Cuboid rightLeg = new Cuboid(15, 4, 12, 4);
+
+        Cuboid headL = new Cuboid(16, 8, 8, 8);
+        Cuboid bodyL = new Cuboid(16, 8, 12, 4);
+        Cuboid leftArmL = new Cuboid(16, armWidth, 12, 4);
+        Cuboid rightArmL = new Cuboid(16, armWidth, 12, 4);
+        Cuboid leftLegL = new Cuboid(16, 4, 12, 4);
+        Cuboid rightLegL = new Cuboid(16, 4, 12, 4);
+
+        body.setA(new Point(200, 200));
+        head.setDEcenter(body.start, body.f);
+        leftArm.setStart(body.b);
+        rightArm.setB(body.start);
+        rightLeg.setStart(body.d);
+        leftLeg.setB(body.c);
+
+        headL.setADcenter(head.a, head.d);
+        bodyL.setADcenter(body.a, body.d);
+        leftArmL.setADcenter(leftArm.a, leftArm.d);
+        rightArmL.setADcenter(rightArm.a, rightArm.d);
+        leftLegL.setADcenter(leftLeg.a, leftLeg.d);
+        rightLegL.setADcenter(rightLeg.a, rightLeg.d);
+
+        BufferedImage test = new BufferedImage(400, 800, 2);
+
+        Graphics2D g = test.createGraphics();
+
+        BufferedImage[] l1 = leftLegL.drawTexture(skinTransparent.getSubimage(0, 48, 16, 16));
+        BufferedImage[] l2 = rightLegL.drawTexture(skinTransparent.getSubimage(0, 32, 16, 16));
+        BufferedImage[] l3 = leftArmL.drawTexture(skinTransparent.getSubimage(48, 48, 16, 16));
+        BufferedImage[] l4 = bodyL.drawTexture(skinTransparent.getSubimage(16, 32, 24, 16));
+        BufferedImage[] l5 = rightArmL.drawTexture(skinTransparent.getSubimage(40, 32, 16, 16));
+        BufferedImage[] l6 = headL.drawTexture(skinTransparent.getSubimage(32, 0, 32, 16));
+
+        BufferedImage[] m1 = leftLeg.drawTexture(skinBg.getSubimage(16, 48, 16, 16));
+        BufferedImage[] m2 = rightLeg.drawTexture(skinBg.getSubimage(0, 16, 16, 16));
+        BufferedImage[] m3 = leftArm.drawTexture(skinBg.getSubimage(32, 48, 16, 16));
+        BufferedImage[] m4 = body.drawTexture(skinBg.getSubimage(16, 16, 24, 16));
+        BufferedImage[] m5 = rightArm.drawTexture(skinBg.getSubimage(40, 16, 16, 16));
+        BufferedImage[] m6 = head.drawTexture(skinBg.getSubimage(0, 0, 32, 16));
+
+        g.drawImage(l1[0], 0, 0, null);
+        g.drawImage(m1[0], 0, 0, null);
+        g.drawImage(m1[1], 0, 0, null);
+        g.drawImage(l1[1], 0, 0, null);
+
+        g.drawImage(l2[0], 0, 0, null);
+        g.drawImage(m2[0], 0, 0, null);
+        g.drawImage(m2[1], 0, 0, null);
+        g.drawImage(l2[1], 0, 0, null);
+
+        g.drawImage(l3[0], 0, 0, null);
+        g.drawImage(m3[0], 0, 0, null);
+        g.drawImage(m3[1], 0, 0, null);
+        g.drawImage(l3[1], 0, 0, null);
+
+        g.drawImage(l4[0], 0, 0, null);
+        g.drawImage(m4[0], 0, 0, null);
+        g.drawImage(m4[1], 0, 0, null);
+        g.drawImage(l4[1], 0, 0, null);
+
+        g.drawImage(l5[0], 0, 0, null);
+        g.drawImage(m5[0], 0, 0, null);
+        g.drawImage(m5[1], 0, 0, null);
+        g.drawImage(l5[1], 0, 0, null);
+
+        g.drawImage(l6[0], 0, 0, null);
+        g.drawImage(m6[0], 0, 0, null);
+        g.drawImage(m6[1], 0, 0, null);
+        g.drawImage(l6[1], 0, 0, null);
+
+        g.dispose();
+
+        File interview = Paths.get("gen_images", "interview.png").toFile();
+
+        try {
+            ImageIO.write(test, "png", interview);
+        } catch (IOException e) {}
+
+        return test;
+    }
+
     public static BufferedImage getHead(String username) {
         return getHead(username, 256);
     }
@@ -303,11 +432,9 @@ public class Api {
         return combinedImage;
     }
 
-
-
     
 
-    private static BufferedImage getWarped(Image image, Point a, Point b, Point c, Point d) {
+    static BufferedImage getWarped(Image image, Point a, Point b, Point c, Point d) {
         int width = image.getWidth(null);
         int height = image.getHeight(null);
 
@@ -372,7 +499,7 @@ public class Api {
         return combine;
     }
 
-    private static AffineTransform getTriangleTransform(Point s0, Point s1, Point s2, Point d0, Point d1, Point d2) {
+    static AffineTransform getTriangleTransform(Point s0, Point s1, Point s2, Point d0, Point d1, Point d2) {
         // Determinant of the source point matrix
         double det = s0.x * (s1.y - s2.y) - s0.y * (s1.x - s2.x) + (s1.x * s2.y - s2.x * s1.y);
         
