@@ -80,7 +80,22 @@ public class CommandManager {
     }
 
     int testCommand() {
-        // TODO use this for testing stuff, remove anything later
+
+        JSONObject lb = new JSONObject();
+        JSONArray pl = new JSONArray();
+
+        for (int i = 0; i < data.players.length; i++) {
+            JSONObject o = new JSONObject();
+            o.put("name", data.players[i].name);
+            o.put("perfFraction", "0/1");
+            pl.put(o);
+        }
+
+        lb.put("players", pl);
+        lb.put("promotions", 0);
+        lb.put("demotions", 0);
+
+        ImageGen.averages(Leaderboard.genAvgLeaderboard(lb, data, run, true));
 
         return 1;
     }
@@ -151,8 +166,9 @@ public class CommandManager {
             String name = o.getString("name");
             String twitch = o.getString("twitch");
             int id = o.getInt("id");
+            JSONArray history = o.optJSONArray("history", new JSONArray());
             System.out.println(id + " " + name);
-            Player player = new Player(name, twitch, id);
+            Player player = new Player(name, twitch, id, history);
             player.live = o.getBoolean("live");
             data.addPlayer(player);
         }
@@ -248,9 +264,10 @@ public class CommandManager {
                 JSONObject o = array.getJSONObject(i);
                 String name = o.getString("ign");
                 String twitch = Main.fixLink(o.getString("twitch_username"));
+                JSONArray history = o.optJSONArray("history", new JSONArray());
                 int id = data.players.length;
                 System.out.println(id + " " + name);
-                Player player = new Player(name, twitch, id);
+                Player player = new Player(name, twitch, id, history);
                 data.addPlayer(player);
             }
             System.out.println("Import complete");
@@ -663,6 +680,34 @@ public class CommandManager {
 
         int seedcount = commandObject.getInt("value");
 
+        if (seedcount == 0) {
+            System.out.println("Initial multi-week scores");
+
+            JSONObject lb = new JSONObject();
+            JSONArray pl = new JSONArray();
+
+            for (int i = 0; i < data.players.length; i++) {
+                JSONObject o = new JSONObject();
+                o.put("name", data.players[i].name);
+                o.put("perfFraction", "0/1");
+                pl.put(o);
+            }
+
+            lb.put("players", pl);
+            lb.put("promotions", 0);
+            lb.put("demotions", 0);
+
+            ImageGen.averages(Leaderboard.genAvgLeaderboard(lb, data, run, true));
+
+            // refresh the image
+            run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"multiweek\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "multiweek.png" + "\"}}}}");
+
+            // switch to lb scene
+            run.commandManager.execute(run.commandParser.getCommand("scene mw"));
+
+            return 1;
+        }
+
         // check match ids
 
         boolean test = true;
@@ -697,7 +742,10 @@ public class CommandManager {
         // generate a new lb image
         JSONObject lb = Api.readJSON(Paths.get("lb_data", "leaderboard.json").toFile());
         ImageGen.leaderboard(lb, data.currentSeed, Main.getSeedcount(data.leagueNumber));
-        ImageGen.averages(lb);
+
+        // generate multi-week average board
+        JSONObject avg = Leaderboard.genAvgLeaderboard(lb, data, run, false);
+        ImageGen.averages(avg);
 
         // refresh the images
         run.client.send("{\"op\": 6, \"d\": {\"requestType\": \"SetInputSettings\", \"requestId\": \"0\", \"requestData\": {\"inputName\": \"leaderboard\", \"overlay\": true, \"inputSettings\": {\"file\":\"" + run.imageGenPath + "leaderboard.png" + "\"}}}}");

@@ -234,6 +234,7 @@ public class Main {
             pl.put("name", players[i].name);
             pl.put("twitch", players[i].twitch);
             pl.put("live", players[i].live);
+            pl.put("history", players[i].history);
             playerList.put(pl);
         }
 
@@ -348,6 +349,8 @@ class Player {
     String uuid;
     int id;
 
+    JSONArray history;
+
     int lb_points = 0;
     boolean lb_played = false;
     int lb_comps = 0;
@@ -357,14 +360,18 @@ class Player {
     
     boolean playing = false;
 
-    public Player(String name, String twitch, int id) {
+    public Player(String name, String twitch, int id, JSONArray history) {
         this.name = name;
         this.twitch = twitch;
         this.id = id;
+
+        this.history = history;
+
         if (twitch.equals("none")) twitch = "";
         if (twitch.equals("")) live = false; else live = true;
 
         try {
+            Api.dlSkin(name);
             Api.getHead(name, 100);
         } catch (Exception e) {}
     }

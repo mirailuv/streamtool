@@ -374,7 +374,7 @@ public class ImageGen {
         for (int i = 0; i < players.length(); i++) {
             JSONObject o = players.getJSONObject(i);
             String name = o.getString("name");
-            String perf = o.getString("perfRounded");
+            String perf = o.getString("perfMulti");
 
             if (perf.equals("100.0%")) perf = "Winner";
 
@@ -399,7 +399,13 @@ public class ImageGen {
 
             if (i < promotions) g.setBackground(promote);
             if (i >= players.length() - demotions) g.setBackground(demote);
-            if (perf.equals("0.0%")) g.setBackground(demote);
+            if (perf.equals("0.0%")) {
+                if (lb.optBoolean("initial", false)) {
+                    perf = "None";
+                } else {
+                    g.setBackground(demote);
+                }
+            }
 
             g.clearRect(0, 0, width, height);
             g.setColor(white);

@@ -26,6 +26,10 @@ public class Fraction {
         return p;
     }
 
+    public double getDouble() {
+        return a * 100.0 / b;
+    }
+
     public void simplify() {
         int maxInit = a;
         if (b > a) maxInit = b;

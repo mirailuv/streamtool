@@ -27,6 +27,7 @@ go live on obs.
 
 switching from intermission at the start:
 > scene co		// switch to commentator scene, do like an intro.
+> lb            // when the seed is initially set to 0, this will show all the players and their previous scores.
 > order show		// show the seed order.
 
 when ready to start the seed:
@@ -58,6 +59,7 @@ when the seed is over:
 > comp				// show completions for the seed. disables auto-update if the timer hasn't ended yet.
 > lb				// downloads match data, generates leaderboard and switches to leaderboard scene.
 > override points (number)	// override the points in case they don't match the bot or website. enter the number of points for 1st place. then just run comp/lb again. usually this isn't necessary.
+> scene mw			// show the projected multi-week relegation scores. run this after lb. kinda optional unless you want to talk about it. but show this after the last one at least.
 
 when it's time for break:
 > scene co		// switch from leaderboard to commentators. explain the break and how long it's gonna be. or you can do this on lb idk.

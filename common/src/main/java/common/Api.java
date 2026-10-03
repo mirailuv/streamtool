@@ -43,7 +43,6 @@ public class Api {
         out.close();
 
         JSONObject user = Api.readJSON(dlFile);
-        System.out.println(user.toString());
 
         String uuid = user.getString("id");
 
@@ -56,7 +55,6 @@ public class Api {
         out.close();
 
         JSONObject profile = Api.readJSON(dlFile);
-        System.out.println(profile.toString());
 
 
         JSONArray properties = profile.getJSONArray("properties");
@@ -74,8 +72,6 @@ public class Api {
         if (value == null) return;
 
         JSONObject thing = new JSONObject(new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8));
-
-        System.out.println(thing.toString());
 
         File skinsFolder = Paths.get("skins").toFile();
         if (!skinsFolder.exists()) skinsFolder.mkdirs();

@@ -10,15 +10,19 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import common.Api;
+import common.Fraction;
 
 public class Leaderboard {
 
@@ -266,5 +270,103 @@ public class Leaderboard {
             int result = playerCount * 15 + 50;
             return result / 100;
         }
+    }
+
+    public static JSONObject genAvgLeaderboard(JSONObject lb, Data data, RuntimeData run, boolean initial) {
+        JSONArray board = lb.getJSONArray("players");
+        ArrayList<JSONObject> avgBoard = new ArrayList<>();
+
+        for (int i = 0; i < board.length(); i++) {
+            JSONObject o = board.getJSONObject(i);
+
+            String name = o.getString("name");
+            Double current = new Fraction(o.getString("perfFraction")).getDouble();
+
+            Player player = data.getPlayer(name);
+            ArrayList<Double> history = new ArrayList<>();
+
+            if (player != null) {
+                int j = 2;
+                for (int i2 = player.history.length() - 1; i2 >= 0; i2--) {
+                    history.add(player.history.optDouble(i2, -1.0));
+                    j--;
+                    if (j < 1) break;
+                }
+            }
+
+            for (int i2 = 0; i2 < history.size(); i2++) {
+                if (history.get(i2) < 0) {
+                    history.remove(i2);
+                    i2--;
+                }
+            }
+
+            int div = history.size() + 1;
+
+            Double sum = current;
+
+            if (initial) {
+                sum = 0.0;
+                div--;
+
+                if (div == 0) div = 1;
+            }
+
+            for (int i2 = 0; i2 < history.size(); i2++) {
+                sum += history.get(i2);
+            }
+
+            sum /= div;
+
+            if (!initial && i == 0) {
+                sum = 100.0;
+            }
+
+            DecimalFormat formatter = new DecimalFormat("#0.0", DecimalFormatSymbols.getInstance( Locale.ENGLISH ));
+
+            String perfMulti = formatter.format(sum) + "%";
+
+            o.put("sum", sum);
+            o.put("perfMulti", perfMulti);
+
+            avgBoard.add(o);
+        }
+
+        avgBoard.sort(new Comparator<JSONObject>() {
+            public int compare(JSONObject a, JSONObject b) {
+                Double d1 = a.getDouble("sum");
+                Double d2 = b.getDouble("sum");
+
+                if (d1 > d2) return -1;
+                if (d2 > d1) return 1;
+                return 0;
+            }
+        });
+
+        JSONArray avgLb = new JSONArray();
+        for (int i = 0; i < avgBoard.size(); i++) {
+            JSONObject o = avgBoard.get(i);
+            o.remove("sum");
+            avgLb.put(o);
+        }
+
+        JSONObject result = new JSONObject();
+        result.put("players", avgLb);
+
+        result.put("promotions", lb.getInt("promotions"));
+        result.put("demotions", lb.getInt("demotions"));
+        result.put("initial", initial);
+
+        File file = Paths.get("lb_data", "multiweek.json").toFile();
+
+        try {
+            BufferedWriter w = new BufferedWriter(new FileWriter(file));
+            w.write(result.toString());
+            w.close();
+        } catch (IOException e) {
+            System.out.println("Failed to write averages");
+        }
+
+        return result;
     }
 }

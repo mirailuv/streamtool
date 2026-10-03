@@ -538,7 +538,7 @@ public class Data {
     }
 
     void addPlayer(String name, String twitch) {
-        Player player = new Player(name, twitch, players.length);
+        Player player = new Player(name, twitch, players.length, new JSONArray());
         addPlayer(player);
     }
 
