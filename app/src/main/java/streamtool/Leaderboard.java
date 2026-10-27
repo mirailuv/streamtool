@@ -109,6 +109,7 @@ public class Leaderboard {
                 JSONObject pl4 = (JSONObject) players.get(eee);
                 if (!Comp.isRegistered((String) pl4.get("nickname"), regList)) {
                     players.remove(eee);
+                    System.out.println("Unlisted player: " + pl4.get("nickname"));
                     eee--;
                 }
             }
@@ -125,6 +126,7 @@ public class Leaderboard {
                 JSONObject pl3 = (JSONObject) comp.get(i2);
                 if (data.getName(pl3.getString(uuidKey)) == null) {
                     comp.remove(i2);
+                    System.out.println("Unlisted player: " + Api.getUsername(pl3.getString(uuidKey)));
                     i2--;
                 }
             }

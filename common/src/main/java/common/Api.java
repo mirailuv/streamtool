@@ -79,6 +79,39 @@ public class Api {
         return s;
     }
 
+    public static String getUsername(String uuid) {
+        StringBuilder response = new StringBuilder();
+        try {
+            URI uri = new URI("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
+            HttpsURLConnection conn = (HttpsURLConnection) uri.toURL().openConnection();
+            
+            int code = conn.getResponseCode();
+            InputStream is;
+
+            if (code >= 400) is = conn.getErrorStream(); else is = conn.getInputStream();
+
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
+                String responseLine;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+            }
+
+        } catch (Exception e) {
+            return null;
+        }
+
+        String s = null;
+
+        try {
+            s = new JSONObject(response.toString()).optString("name", null);
+        } catch (JSONException e) {
+            return null;
+        }
+
+        return s;
+    }
+
     public static void dlSkin(String username) throws MalformedURLException, IOException, URISyntaxException {
         File dlFile = Paths.get("download.json").toFile();
 

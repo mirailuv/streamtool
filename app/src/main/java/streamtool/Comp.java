@@ -56,7 +56,7 @@ public class Comp {
             String uuid = pl3.getString(uuidKey);
             String name = data.getName(uuid);
             if (name == null) {
-                System.out.println("Removed " + uuid);
+                System.out.println("Unlisted player: " + Api.getUsername(uuid));
                 comp.remove(i);
                 i--;
             }
