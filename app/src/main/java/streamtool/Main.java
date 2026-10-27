@@ -96,7 +96,7 @@ public class Main {
         run.autoUpdate = new AutoUpdate(run);
         run.timer = new Timer(run);
 
-        Perch.start(run, data);
+        if (run.obsLayout.optBoolean("perchTimerEnabled", false)) Perch.start(run, data);
 
         while(!run.stop) {
 

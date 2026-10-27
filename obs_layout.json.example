@@ -51,5 +51,8 @@
 		"l5": 33,
 		"l6": 41
 	},
-	"mostPercent": false
+	"mostPercent": false,
+	"updateInterval": 1000,
+	"perchTimerEnabled": false,
+	"perchCorner": "bottom-right"
 }

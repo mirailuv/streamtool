@@ -24,6 +24,8 @@ command list: commands.txt
 
 PERCH TIMER
 
+if you want to use this, set perchTimerEnabled in obs_layout.json to true.
+
 the perch timer shows how long until each player's dragon perches, in the corner of their pov. it shows up once the dragon is past the zero node and goes away when the dragon starts to perch. the small green and red numbers are how much sooner or later it could be.\
 it reads the replay files the rsa client writes, so it only works when the program runs on the same computer as the rsa game. the game folder is found automatically, you just need minecraft open.
 
