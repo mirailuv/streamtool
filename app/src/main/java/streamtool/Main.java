@@ -72,8 +72,6 @@ public class Main {
 
         run.scanner = new Scanner(System.in);
 
-        run.client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
-
         Data data = new Data(run.mostPercent);
 
         if (liveApiConfig != null && liveApiConfig.getBoolean("enabled")) {

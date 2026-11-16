@@ -3,10 +3,14 @@ package streamtool;
 import java.net.URI;
 import java.util.ArrayList;
 
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
+
 import common.Api;
 import common.Client;
 
 public class ClientHandler {
+
+    boolean connected = false;
 
     private Client client;
 
@@ -126,16 +130,33 @@ public class ClientHandler {
     }
 
     void send(String message) {
-        client.send(message);
+        if (connected) try {
+            client.send(message);
+        } catch (WebsocketNotConnectedException e) {
+            connected = false;
+        }
+
+        if (!connected) reconnect();
+    }
+
+    void reconnect() {
+        connected = false;
+        try {
+            if (client.reconnectBlocking()) connected = true;
+        } catch (InterruptedException e) {}
+        if (connected) client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
     }
 
     void connect() {
         try {
             client.connectBlocking();
         } catch (InterruptedException e) {}
+        connected = true;
+        client.send("{\"op\": 1, \"d\": {\"rpcVersion\": 1, \"eventSubscriptions\": 0}}");
     }
 
     void close() {
+        connected = false;
         try {
             client.closeBlocking();
         } catch (InterruptedException e) {}
