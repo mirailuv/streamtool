@@ -94,41 +94,7 @@ public class CommandManager {
 
     int testCommand() {
 
-        MostPercentLeaderboard mp = new MostPercentLeaderboard(data, 6);
-
-        mp.addMatch(13981770);
-        ImageGen.completions(mp.getResult(1));
-        ImageGen.leaderboard(mp.getLeaderboard(), 1, 6);
-
-        run.scanner.next();
-
-        mp.addMatch(13981891);
-        ImageGen.completions(mp.getResult(2));
-        ImageGen.leaderboard(mp.getLeaderboard(), 2, 6);
-
-        run.scanner.next();
-
-        mp.addMatch(13981992);
-        ImageGen.completions(mp.getResult(3));
-        ImageGen.leaderboard(mp.getLeaderboard(), 3, 6);
-
-        run.scanner.next();
-
-        mp.addMatch(13982099);
-        ImageGen.completions(mp.getResult(4));
-        ImageGen.leaderboard(mp.getLeaderboard(), 4, 6);
-
-        run.scanner.next();
-
-        mp.addMatch(13982185);
-        ImageGen.completions(mp.getResult(5));
-        ImageGen.leaderboard(mp.getLeaderboard(), 5, 6);
-
-        run.scanner.next();
-
-        mp.addMatch(13982272);
-        ImageGen.completions(mp.getResult(6));
-        ImageGen.leaderboard(mp.getLeaderboard(), 6, 6);
+        run.client.requestFeedStatus("feed1");
 
         return 1;
     }
@@ -142,6 +108,8 @@ public class CommandManager {
         result += run.commandManager.execute(run.commandParser.getCommand("order api"));
         result += run.commandManager.execute(run.commandParser.getCommand("match clear"));
         result += run.commandManager.execute(run.commandParser.getCommand("scene im"));
+
+        LinkManager.createLinks();
 
         return result;
     }
@@ -222,6 +190,11 @@ public class CommandManager {
         }
 
         System.out.println("Import complete");
+
+        run.commandManager.execute(run.commandParser.getCommand("setseed " + data.currentSeed));
+
+        LinkManager.createLinks();
+
         return 1;
     }
 
@@ -709,7 +682,7 @@ public class CommandManager {
         }
         
         if (player.live) {
-            run.client.showPlayer(player, pos);
+            FeedManager.requestShowPlayer(player, pos);
             return 1;
         } else {
             System.out.println("Player is not live");
@@ -721,14 +694,15 @@ public class CommandManager {
         int value = commandObject.getInt("value");
 
         if (value == 0) {
-            int r = 0;
-            for (int i = 1; i <= 4; i++) {
-                r += run.client.refresh(i);
+            for (int i = 0; i < FeedManager.feeds.size(); i++) {
+                FeedManager.feeds.get(i).reload();
             }
-            return r;
         } else {
-            return run.client.refresh(value);
+            Feed feed = FeedManager.getActiveFeed(value);
+            feed.reload();
         }
+
+        return 1;
     }
 
     int matchCommand(JSONObject commandObject) {
@@ -986,11 +960,13 @@ public class CommandManager {
 
                     if (run.mainspec && safety == 4) safety = 3;
 
+                    ArrayList<Player> l = new ArrayList<>();
                     for (int i = 0; i < safety; i++) {
-                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, false);
+                        Player p = data.getPlayer(povs[i]);
+                        if (p != null) l.add(p);
                     }
 
-                    run.commandManager.executeDelayed(run.commandParser.getCommand("scene update " + safety), Main.abDelay);
+                    FeedManager.requestSetActiveFeeds(l);
                 }
 
                 return 1;
@@ -1010,11 +986,13 @@ public class CommandManager {
                     int safety = povs.length;
                     if (safety > 4) safety = 4;
 
+                    ArrayList<Player> l = new ArrayList<>();
                     for (int i = 0; i < safety; i++) {
-                        run.client.showPlayer(data.getPlayer(povs[i]), i + 1, false);
+                        Player p = data.getPlayer(povs[i]);
+                        if (p != null) l.add(p);
                     }
 
-                    run.commandManager.execute(run.commandParser.getCommand("scene game " + safety));
+                    FeedManager.requestSetActiveFeeds(l);
                 }
 
                 return 1;

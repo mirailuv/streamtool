@@ -3,6 +3,7 @@ package streamtool;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -49,8 +50,12 @@ public class Perch {
                             perch.run(seed);
                         }
 
-                        for (int i = 0; i < 4; i++) {
-                            Status status = status(run.client.povs[i]);
+                        ArrayList<Player> povs = FeedManager.getPovs();
+
+                        for (int i = 0; i < povs.size(); i++) {
+                            Player player = povs.get(i);
+
+                            Status status = status(player);
                             String text = text(status);
                             String sooner = text.isEmpty() ? "" : status.soonerText();
                             String later = text.isEmpty() ? "" : status.laterText();

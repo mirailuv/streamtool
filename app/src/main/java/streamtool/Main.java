@@ -50,6 +50,8 @@ public class Main {
         run.audio = (JSONObject) run.obsLayout.get("audio");
         run.paths = (JSONObject) run.obsLayout.get("paths");
 
+        run.feedCount = run.obsLayout.optInt("feedCount", 8);
+
         abDelay = run.obsLayout.optLong("switchDelay", 0L);
         run.mostPercent = run.obsLayout.optBoolean("mostPercent", false);
 
@@ -94,6 +96,9 @@ public class Main {
         run.autoUpdate = new AutoUpdate(run);
         run.timer = new Timer(run);
 
+        FeedManager.init(run, data);
+        LinkManager.init(data, run);
+
         if (run.obsLayout.optBoolean("perchTimerEnabled", false)) Perch.start(run, data);
 
         while(!run.stop) {
@@ -134,6 +139,7 @@ public class Main {
         run.snapshot.stop();
         run.timer.stop();
         Streamlink.killAll();
+        FeedManager.stop();
 
         run.client.close();
     }
@@ -376,6 +382,12 @@ class Player {
     String uuid;
     int id;
 
+    Streamlink feed;
+
+    int getPort() {
+        if (feed != null) return feed.port; else return 0;
+    }
+
     String displayName;
     String pronouns;
 
@@ -443,6 +455,10 @@ class RuntimeData {
     JSONObject obsLayout;
 
     int portRange;
+    int currentPort = 0;
+
+    int feedCount = 8;
+
     boolean useStreamlink = true;
 
     JSONObject scenes;
