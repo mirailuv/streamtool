@@ -1,5 +1,5 @@
 {
-	"format": 2,	
+	"format": 3,	
 	"scenes": {
 		"intermissionScene": "INTERMISSION",
 		"commentatorScene": "COMMENTATORS",
@@ -20,13 +20,13 @@
 			"gs2": "MAIN 2 SPEC",
 			"gs3": "MAIN 3 SPEC"
 		},
-
-		"abIds": {
-			"p1": {"a": 17, "b": 27},
-			"p2": {"a": 21, "b": 28},
-			"p3": {"a": 22, "b": 29},
-			"p4": {"a": 20, "b": 30}
+		"feedIds": {
+			"p1": [17, 27, 21, 22, 20, 28, 29, 30],
+			"p2": [42, 41, 40, 39, 38, 37, 36, 35],
+			"p3": [50, 49, 48, 47, 46, 45, 44, 43],
+			"p4": [58, 57, 56, 55, 54, 53, 52, 51]
 		},
+		"feedCount": 8,
 		"interviewScene": "INTERVIEW"
 	},
 	"audio": {
