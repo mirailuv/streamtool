@@ -39,7 +39,7 @@ public class MessageHandler extends Message {
                         i = Integer.parseInt(p);
                     } catch (NumberFormatException e) {}
                     if (i >= 0 && i < FeedManager.feeds.size()) {
-                        FeedManager.feeds.get(i).status = Status.STANDBY;
+                        FeedManager.feeds.get(i).setStatus();
                     }
                 }
             }

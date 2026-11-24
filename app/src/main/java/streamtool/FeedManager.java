@@ -13,9 +13,11 @@ enum Status {
 
 public class FeedManager {
 
+    static int maxPovs = 4;
+
     static boolean running = false;
 
-    static Long timeout = 10000L;
+    static Long timeout = 20000L;
 
     static RuntimeData run;
     static Data data;
@@ -32,6 +34,8 @@ public class FeedManager {
 
         FeedManager.run = run;
         FeedManager.data = data;
+
+        run.client.clearLinks(run.feedCount);
 
         for (int i = 0; i < run.feedCount; i++) {
             feeds.add(new Feed("feed" + i));
@@ -92,7 +96,7 @@ public class FeedManager {
             // if not
 
             // replace the selected pos with the requested player if possible, or just add them to last possible one
-            if (p < activeFeeds) {
+            if (p <= activeFeeds) {
                 povs.set(p - 1, player);
             } else povs.add(player);
         }
@@ -135,41 +139,53 @@ public class FeedManager {
         int activeCount = povs.size();
 
         // limit to 4 active povs
-        if (activeCount > 4) activeCount = 4;
+        if (activeCount > maxPovs) activeCount = maxPovs;
 
         ArrayList<Feed> newActive = new ArrayList<>();
 
         // get the feeds for each player
-        for (int i = 0; i < povs.size(); i++) {
+        for (int i = 0; i < activeCount; i++) {
             Feed feed = getPlayerFeed(povs.get(i));
             if (feed != null) {
                 newActive.add(feed);
             }
         }
 
-        // update active feed count
+        // update active feed count in case some feeds weren't available
         activeFeeds = newActive.size();
+        //System.out.println("Active feeds: " + activeFeeds);
 
         // wait until the feeds are ready
         while (true) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {}
+
             boolean test = true;
             for (int i = 0; i < newActive.size(); i++) {
                 if (newActive.get(i).status == Status.LOADING) test = false;
             }
-            if (test) break;
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {}
+            if (test) {
+                /*System.out.println("Feeds ready:");
+                for (int i = 0; i < newActive.size(); i++) {
+                    System.out.println(newActive.get(i).obsName + " " + newActive.get(i).status.toString());
+                }*/
+                break;
+            }
         }
 
         // change current active feeds to standby
         for (int i = 0; i < feeds.size(); i++) {
             Feed feed = feeds.get(i);
-            if (feed.status == Status.ACTIVE) feed.status = Status.STANDBY;
+            if (feed.status == Status.ACTIVE) {
+                //System.out.println("Set " + feed.obsName + " STANDBY");
+                feed.status = Status.STANDBY;
+            }
         }
 
         // set new active feeds to active and set their positions
         for (int i = 0; i < newActive.size(); i++) {
+            //System.out.println("Set " + newActive.get(i).obsName + " ACTIVE");
             newActive.get(i).status = Status.ACTIVE;
             newActive.get(i).activePos = i + 1;
         }
@@ -317,6 +333,7 @@ class Feed {
     Player player;
     Long lastUpdate = 0L;
     int activePos = 10;
+    boolean loadActive = false;
 
     Feed(String obsName) {
         this.obsName = obsName;
@@ -324,15 +341,18 @@ class Feed {
     }
 
     void reload() {
-        load(player, true);
+        load(player);
     }
 
-    void load(Player player, boolean keepStatus) {
-
-        Status old = status;
+    void load(Player player) {
 
         this.player = player;
+
+        if (status == Status.ACTIVE) loadActive = true; else loadActive = false;
+
+        //System.out.println("Set " + obsName + " LOADING");
         status = Status.LOADING;
+
         lastUpdate = System.currentTimeMillis();
 
         // send the link to obs
@@ -343,6 +363,12 @@ class Feed {
         new Thread(new Runnable() {
             public void run() {
                 Long timeout = System.currentTimeMillis() + FeedManager.timeout;
+
+                // wait a bit so obs has time to switch to the new source
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {}
+
                 while(System.currentTimeMillis() < timeout) {
                     // break if the streamlink process is dead, as the stream will never load
                     if (player.feed.process != null && !player.feed.process.isAlive()) break;
@@ -357,14 +383,16 @@ class Feed {
                     // break if MessageHandler changed the status from loading
                     if (status != Status.LOADING) break;
                 }
-                status = Status.STANDBY;
-                if (keepStatus) status = old;
+                if (status == Status.LOADING) {
+                    setStatus();
+                }
             }
         }).start();
     }
 
-    void load(Player player) {
-        load(player, false);
+    void setStatus() {
+        //System.out.println("Loaded " + obsName + " " + loadActive);
+        if (loadActive) status = Status.ACTIVE; else status = Status.STANDBY;
     }
 }
 

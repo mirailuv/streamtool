@@ -62,6 +62,12 @@ public class ClientHandler {
         send(request.toString());
     }
 
+    void clearLinks(int count) {
+        for (int i = 0; i < count; i++) {
+            setFeedLink("feed" + i, "");
+        }
+    }
+
     void requestFeedStatus(String feedName) {
         JSONObject request = new JSONObject();
         request.put("op", 6);

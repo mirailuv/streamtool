@@ -706,7 +706,12 @@ public class CommandManager {
             }
         } else {
             Feed feed = FeedManager.getActiveFeed(value);
-            feed.reload();
+            if (feed != null) {
+                feed.reload();
+            } else {
+                System.out.println("Feed is null");
+                return 0;
+            }
         }
 
         return 1;
