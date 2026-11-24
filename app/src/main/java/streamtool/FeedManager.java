@@ -134,6 +134,10 @@ public class FeedManager {
     }
 
     static void setActiveFeeds(ArrayList<Player> povs) {
+
+        // return if request is identical to what's already on screen
+        if (povs.equals(FeedManager.povs)) return;
+
         int prevActive = activeFeeds;
 
         int activeCount = povs.size();
