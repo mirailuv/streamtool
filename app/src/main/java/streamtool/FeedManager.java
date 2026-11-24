@@ -324,10 +324,13 @@ class Feed {
     }
 
     void reload() {
-        load(player);
+        load(player, true);
     }
 
-    void load(Player player) {
+    void load(Player player, boolean keepStatus) {
+
+        Status old = status;
+
         this.player = player;
         status = Status.LOADING;
         lastUpdate = System.currentTimeMillis();
@@ -355,8 +358,13 @@ class Feed {
                     if (status != Status.LOADING) break;
                 }
                 status = Status.STANDBY;
+                if (keepStatus) status = old;
             }
         }).start();
+    }
+
+    void load(Player player) {
+        load(player, false);
     }
 }
 
