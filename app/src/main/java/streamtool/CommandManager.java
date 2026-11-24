@@ -49,6 +49,7 @@ public class CommandManager {
         switch (command) {
             case "quit": return quitCommand();
             case "test": return testCommand();
+            case "status": return statusCommand();
             case "restore": return restoreCommand();
             case "init": return initCommand();
             case "start": return startCommand();
@@ -95,6 +96,12 @@ public class CommandManager {
     int testCommand() {
 
         run.client.requestFeedStatus("feed1");
+
+        return 1;
+    }
+
+    int statusCommand() {
+        FeedManager.printStatus();
 
         return 1;
     }

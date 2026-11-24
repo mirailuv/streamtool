@@ -45,6 +45,9 @@ public class CommandParser {
             case "test":
                 result.put("command", "test");
                 break;
+            case "status":
+                result.put("command", "status");
+                break;
             case "restore":
                 result.put("command", "restore"); // restore previous data
                 break;

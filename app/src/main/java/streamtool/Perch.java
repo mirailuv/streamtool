@@ -50,7 +50,7 @@ public class Perch {
                             perch.run(seed);
                         }
 
-                        ArrayList<Player> povs = FeedManager.getPovs();
+                        ArrayList<Player> povs = FeedManager.povs;
 
                         for (int i = 0; i < povs.size(); i++) {
                             Player player = povs.get(i);

@@ -22,6 +22,8 @@ public class FeedManager {
 
     static ArrayList<Feed> feeds = new ArrayList<>();
 
+    static ArrayList<Player> povs = new ArrayList<>();
+
     static int activeFeeds = 0;
 
     private static ArrayList<FeedRequest> queue = new ArrayList<>();
@@ -67,21 +69,9 @@ public class FeedManager {
         });
     }
 
-    // get the current active povs
-    static ArrayList<Player> getPovs() {
-        ArrayList<Player> povs = new ArrayList<>();
-        for (int i = 0; i < activeFeeds; i++) {
-            Feed feed = getActiveFeed(i + 1);
-            if (feed != null) povs.add(feed.player);
-        }
-        return povs;
-    }
-
     static void requestShowPlayer(Player player, int p) {
 
         loadPlayer(player);
-
-        ArrayList<Player> povs = getPovs();
 
         if (isOnActive(player)) {
             // if requested player is already shown on screen
@@ -185,6 +175,7 @@ public class FeedManager {
         }
 
         // update feeds in obs
+        FeedManager.povs = povs;
         updateFeedsOnObs();
 
         // change scene if necessary
@@ -272,6 +263,30 @@ public class FeedManager {
         }
     }
 
+    static void printStatus() {
+        System.out.println("Povs:");
+        for (int i = 0; i < povs.size(); i++) {
+            System.out.println("p" + (i + 1) + " " + povs.get(i).name);
+        }
+
+        System.out.println();
+        System.out.println("Feeds:");
+        for (int i = 0; i < feeds.size(); i++) {
+            Feed feed = feeds.get(i);
+
+            String name;
+            if (feed.player != null) {
+                name = feed.player.name;
+            } else name = "";
+
+            if (feeds.get(i).status == Status.ACTIVE) {
+                System.out.println(feed.obsName + " " + name + " " + feed.status.toString() + " " + feed.activePos);
+            } else {
+                System.out.println(feed.obsName + " " + name + " " + feed.status.toString());
+            }
+        }
+    }
+
     static Feed getIdleFeed() {
 
         // if a feed is idle, returns that
@@ -292,7 +307,7 @@ public class FeedManager {
             }
         }
 
-        return null;
+        return oldest;
     }
 }
 
