@@ -375,7 +375,7 @@ class Feed {
 
                 while(System.currentTimeMillis() < timeout) {
                     // break if the streamlink process is dead, as the stream will never load
-                    if (player.feed.process != null && !player.feed.process.isAlive()) break;
+                    if (player.feed != null && player.feed.process != null && !player.feed.process.isAlive()) break;
 
                     // request feed status from obs
                     FeedManager.run.client.requestFeedStatus(obsName);

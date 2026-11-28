@@ -13,6 +13,9 @@ set the league and week numbers manually, in case init or import true doesn't do
 > killfeeds
 kill all previous streamlink player feed instances. they may stay running when you crash as it's an external program.
 
+> status
+show status of feeds managed by this program
+
 > import (true)
 import player list downloaded from the leagues bot after doing /list. updates player count number on intermission. with true argument, updates league and week information as well.
 
